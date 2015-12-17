@@ -1,4 +1,21 @@
 function xml=get_coverage_xml(obj, root_dir)
+% Get XML coverage representation
+%
+% xml=get_coverage_json(obj, root_dir)
+%
+% Inputs:
+%   obj                 MOcovMFile instance
+%   root_dir            git root directory in which the file represented
+%                       by obj resides
+%
+% Output:
+%   json                XML string representation of coverage, with
+%                       line-rate set according to coverage and branch-rate
+%                       set to zero.
+%
+% Notes:
+%   - this output can be used by the shippable.com online service
+%
     relative_fn=mocov_get_relative_path(root_dir,obj.filename);
 
     [pth,nm,ext]=fileparts(relative_fn);
@@ -9,7 +26,7 @@ function xml=get_coverage_xml(obj, root_dir)
     % and treat them all as one big file
     header=sprintf(['<class name="%s" filename="%s" '...
                         'line-rate="%.3f" '...
-                        'branch-rate="1.0">\n'...
+                        'branch-rate="0.0">\n'...
                         '<methods></methods>'],...
                     nm,relative_fn,r);
     footer='</class>';
@@ -20,17 +37,14 @@ function xml=get_coverage_xml(obj, root_dir)
 
 
 function xml=get_reportable_lines_xml(obj)
-    idxs=find(obj.executable);
+    idxs=find(get_lines_executable(obj));
     n=numel(idxs);
 
+    executed_count=get_lines_executed_count(obj);
     lines=cell(1,n);
     for k=1:n
         idx=idxs(k);
-        if obj.executed(idx)
-            hits=1;
-        else
-            hits=0;
-        end
+        hits=executed_count(idx);
         lines{k}=sprintf('<line number="%d" hits="%d" branch="false"/>',...
                         idx,hits);
     end
@@ -39,4 +53,5 @@ function xml=get_reportable_lines_xml(obj)
 
 
 function r=get_coverage_ratio(obj)
-    r=sum(obj.executed & obj.executable) / sum(obj.executable);
+    executable=get_lines_executable(obj);
+    r=sum(get_lines_executed(obj) & executable) / sum(executable);

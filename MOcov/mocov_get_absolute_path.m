@@ -1,5 +1,15 @@
 function abs_fn=mocov_get_absolute_path(fn)
-    % returns the absolute path of fn
+% return the absolute path
+%
+% abs_fn=mocov_get_absolute_path(fn)
+%
+% Input:
+%   fn          filename or path
+%
+% Output:
+%   abs_fn      absolute path of fn
+%
+
     if mocov_is_absolute_path(fn)
         abs_fn=fn;
     else

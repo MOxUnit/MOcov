@@ -9,7 +9,7 @@ OCTAVE?=octave
 TESTDIR=$(CURDIR)/tests
 ROOTDIR=$(CURDIR)/MOcov
 
-ADDPATH=orig_dir=pwd();cd('$(ROOTDIR)');addpath(pwd());cd(orig_dir)
+ADDPATH=orig_dir=pwd();cd('$(ROOTDIR)');addpath(pwd);cd(orig_dir)
 RMPATH=rmpath('$(ROOTDIR)');
 SAVEPATH=savepath();exit(0)
 
@@ -24,7 +24,7 @@ help:
 	@echo "  uninstall          to remove MOcov from the Matlab and GNU"
 	@echo "                     Octave search paths, using whichever is"
 	@echo "                     present"
-	@echo "  run                to run coverage using the Matlab and GNU Octave"
+	@echo "  test               to run tests using the Matlab and GNU Octave"
 	@echo "                     search paths, whichever is present"
 	@echo ""
 	@echo "  install-matlab     to add MOcov to the Matlab search path"
@@ -32,32 +32,24 @@ help:
 	@echo "  uninstall-matlab   to remove MOcov from the Matlab search path"
 	@echo "  uninstall-octave   to remove MOcov from the GNU Octave search"
 	@echo "                     path"
-	@echo "  test-matlab        to run tests using Matlab"
-	@echo "  test-octave        to run tests using GNU Octave"
+	@echo "  test-matlab        to run tests using Matlab [1]"
+	@echo "  test-octave        to run tests using GNU Octave [1]"
+	@echo ""
+	@echo "[1] requires MOxUnit: https://github.com/MOxUnit/MOxUnit
 	@echo "------------------------------------------------------------------"
 	@echo ""
-	@echo "The variable COBERTURA_XML, if set, defines the filename where "
-	@echo "Cobertura-like XML output is written to."
+	@echo "Environmental variables for storing test results:"
+	@echo "  JUNIT_XML_FILE    		JUnit-like XML output with test result"
 	@echo ""
 
-RUNTESTS_ARGS='-v'
-
-ifdef COBERTURA_XML
-	RUNTESTS_ARGS +=,'-xml','$(COBERTURA_XML)'
+RUNTESTS_ARGS='${TESTDIR}'
+ifdef JUNIT_XML_FILE
+	RUNTESTS_ARGS +=,'-junit_xml_file','$(JUNIT_XML_FILE)'
+	export JUNIT_XML_FILE
 endif
+	
 
-ifdef EXPRESSION
-	RUNTESTS_ARGS +=,'-e','$(EXPRESSION)'
-endif
-
-ifdef DIR
-	RUNTESTS_ARGS +=,'-c','$(DIR)'
-endif
-
-export RUNTESTS_ARGS
-
-RUN=$(ADDPATH);mocov($(RUNTESTS_ARGS));exit();
-
+TEST=$(ADDPATH);if(isempty(which('moxunit_runtests'))),error('MOxUnit is required; see https://github.com/MOxUnit/MOxUnit');end;success=moxunit_runtests($(RUNTESTS_ARGS));exit(~success);
 
 MATLAB_BIN=$(shell which $(MATLAB))
 OCTAVE_BIN=$(shell which $(OCTAVE))
@@ -116,27 +108,27 @@ uninstall:
 	$(MAKE) uninstall-octave
 
 
-run-matlab:
+test-matlab:
 	@if [ -n "$(MATLAB_BIN)" ]; then \
-		$(MATLAB_RUN) "$(RUN)"; \
+		$(MATLAB_RUN) "$(TEST)"; \
 	else \
 		echo "matlab binary could not be found, skipping"; \
 	fi;
 
-run-octave:
+test-octave:
 	if [ -n "$(OCTAVE_BIN)" ]; then \
-		$(OCTAVE_RUN) "$(RUN)"; \
+		$(OCTAVE_RUN) "$(TEST)"; \
 	else \
 		echo "octave binary could not be found, skipping"; \
 	fi;
 
-run:
+test:
 	@if [ -z "$(MATLAB_BIN)$(OCTAVE_BIN)" ]; then \
 		@echo "Neither matlab binary nor octave binary could be found" \
 		exit 1; \
 	fi;
-	$(MAKE) run-matlab
-	$(MAKE) run-octave
+	$(MAKE) test-matlab
+	$(MAKE) test-octave
 
 
 

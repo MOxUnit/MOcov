@@ -1,4 +1,4 @@
-function write_xml(obj, output_fn)
+function write_cobertura_xml(obj, output_fn)
     monitor=obj.monitor;
     notify(monitor,'Writing xml files in %s', output_fn);
 

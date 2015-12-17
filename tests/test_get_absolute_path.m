@@ -12,6 +12,10 @@ function test_get_absolute_path_basics()
     aeq('/foo/../.','/');
     aeq('/foo/.././','/');
 
-    p=fileparts(which(mfilename()));
+
+    orig_pwd=pwd();
+    cleaner=onCleanup(@()cd(orig_pwd));
+    p=fileparts(mfilename('fullpath'));
+    cd(p);
     aeq('',p);
 

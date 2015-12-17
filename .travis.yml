@@ -1,7 +1,7 @@
 # vim ft=yaml
-# travis-ci.org definition for MOcov build (based on MOxUnit, 
-# based on CoSMoMVPA, based on PyMVPA, based on nipype configuration, 
-# based on nipy)
+# travis-ci.org definition for MOxUnit build (based on CoSMoMVPA,
+# which is based on PyMVPA, which is based on nipype configuration, 
+# which in turn was based on nipy)
 #
 # We pretend to be java because we need GNU Octave which is not
 # available (as of April 2015)
@@ -22,21 +22,28 @@ before_install:
     - travis_retry sudo apt-get -y -qq update
     # get Octave 4,0
     - travis_retry sudo apt-get -y -qq install octave
-    # get and install MOxUnit
-    - ROOTDIR=pwd
-    - echo $p
+    # install MOxUnit
     - cd ..
-    - git clone https://github.com/MOxUnit/MOxUnit.git
-    - cd MOxUnit
-    - MOXUNITDIR=pwd
-    - make install
-    - cd ${ROOTDIR}
+    - rm -rf MOxUnit
+    - git clone -b coverage https://github.com/nno/MOxUnit.git
+    - make -C MOxUnit install
+    - cd MOCov
     # generate .xml file when running on shippable.com
     - if [[  "$SHIPPABLE" == "true"  ]];  then
-          #TEST_ARGS=JUNIT_XML=shippable/testresults/testresults.xml;
-          TEST_ARGS=EXPRESSION="moxunit_runtests(''${MOXUNITDIR}/tests'',''-verbose'');" DIR="${MOXUNITDIR}/MOxUnit" COBERTURA_XML=shippable/codecoverage/coverage.xml;
+          TEST_ARGS=JUNIT_XML=shippable/testresults/testresults.xml;
       fi
 
 script:
-    - make run ${RUN_ARGS}
+    - make install
+    - cd ../MOxUnit
+    - echo ${ROOTDIR}
+    - pwd
+    - if [[  "$SHIPPABLE" == "true"  ]]; then
+          make test COVERAGE_DIR=`pwd`/MOxUnit JUNIT_XML=../MOcov/shippable/testresults/testresults.xml COBERTURA_XML=../MOcov/shippable/codecoverage/coverage.xml ;
+      fi
+    - if [[  "$TRAVIS" == "true"  ]]; then
+          make test COVERAGE_DIR=`pwd`/MOxUnit COVERALLS_JSON=coveralls.json ;
+          curl --verbose -F 'json_file=@coveralls.json' https://coveralls.io/api/v1/jobs;
+      fi
+
 

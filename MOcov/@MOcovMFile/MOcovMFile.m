@@ -1,14 +1,27 @@
 function obj=MOcovMFile(fn)
+% instantiate MOcov m-file representation of line coverage
+%
+% obj=MOcovMFile(fn)
+%
+% Input:
+%   fn                  Filename of .m file
+%
+% Output:
+%   obj                 MOcovMFile instance that contains, internally,
+%                       the filename, each line of the m-file, which lines
+%                       are executable, and an array counting how often
+%                       each line has been executed.
+
     props=get_mfile_props(fn);
     obj=class(props,'MOcovMFile');
 
 function props=get_mfile_props(fn)
     % get properties of a matlab file. The output has
     %   .filename: filename of mfile
-    %   .executable: Nx1 boolean array for N lines,
-    %                   indicating which lines can be executed
-    %   .executed:   Nx1 false array
-    %   .lines       Nx1 cellstr with lines of mfile
+    %   .executable:        Nx1 boolean array for N lines,
+    %                       indicating which lines can be executed
+    %   .executed_count:    Nx1 false array
+    %   .lines              Nx1 cellstr with lines of mfile
 
     % read the matlab file
     fid=fopen(fn);
@@ -59,7 +72,7 @@ function props=get_mfile_props(fn)
     props=struct();
     props.filename=mocov_get_absolute_path(fn);
     props.executable=executable;
-    props.executed=false(size(props.executable));
+    props.executed_count=zeros(size(props.executable));
     props.lines=lines;
 
 

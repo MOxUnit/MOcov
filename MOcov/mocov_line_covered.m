@@ -4,28 +4,36 @@ function state=mocov_line_covered(varargin)
 % Usages:
 %   1) state=mocov_line_covered();
 %
-%      Queries the current state
+%      Queries the current state; state is a struct with fields:
+%       .keys           Nx1 cell containing n filenames
+%       .line_count    Nx1 cell containing how often each line for each
+%                       filename was executed
 %
 %   2) mocov_line_covered(state)
 %
-%      Sets the state
+%      Sets the state; state must be a cell with fields .keys and
+%      .line_count
 %
-%   3) mocov_line_covered(filename, line_number)
+%   3) mocov_line_covered(idx, fn, line_number, count)
 %
-%      Sets that line 'line_number' in file 'filename' is covered
+%      Add count times that line with line_mumber in file fn is covered.
+%      To avoid lookup time, it is required that in the internal state,
+%      .keys{index}==fn.
+%
+% Notes:
+%   - this function is used to keep track of which files have been executed
+%     across a set of .m files.
 %
 % NNO May 2014
 
 
     persistent cached_keys;
-    persistent cached_lines;
-    persistent cached_last_index;
+    persistent cached_line_count;
 
     % initialize persistent variables, if necessary
     if isnumeric(cached_keys)
         cached_keys=cell(0);
-        cached_lines=cell(0);
-        cached_last_index=[];
+        cached_line_count=cell(0);
     end
 
     switch nargin
@@ -33,120 +41,49 @@ function state=mocov_line_covered(varargin)
             % query the state
             state=struct();
             state.keys=cached_keys;
-            state.lines=cached_lines;
+            state.line_count=cached_line_count;
             return;
 
         case 1
             % set the state
             state=varargin{1};
             if isempty(state)
+                state=struct();
                 state.keys=cell(0);
-                state.lines=cell(0);
+                state.line_count=cell(0);
             end
 
             cached_keys=state.keys;
-            cached_lines=state.lines;
-            cached_last_index=[];
+            cached_line_count=state.line_count;
             return
 
-        case 2
+        case 4
             % add a line covered
-            key=varargin{1};
-            line=varargin{2};
+            index=varargin{1};
+            key=varargin{2};
+            line=varargin{3};
+            count=varargin{4};
+
             state=[];
 
         otherwise
             error('illegal input');
     end
 
-
-
-    if isempty(cached_last_index) || ...
-                ~isequal(cached_keys{cached_last_index}, key)
-        [index, found]=find_key(cached_keys,key);
-        cached_last_index=index;
-        if ~found
-            empty_lines=false(10,1);
-            cached_keys=[cached_keys(1:(index-1)); ...
-                            {key};
-                          cached_keys(index:end)];
-
-            cached_lines=[cached_lines(1:(index-1)); ...
-                            {empty_lines};
-                          cached_lines(index:end)];
-
-        end
+    cached_keys_too_small=numel(cached_keys)<index;
+    if cached_keys_too_small
+        cached_keys{2*index}=[];
+        cached_line_count{2*index}=[];
     end
 
-    if line>numel(cached_lines{cached_last_index})
-        cached_lines{cached_last_index}(2*line)=false;
+    if cached_keys_too_small || isempty(cached_keys{index})
+        cached_keys{index}=key;
+        cached_line_count{index}=zeros(10,1);
+    elseif ~isequal(cached_keys{index},key)
+        error('Key mismatch, %s ~= %s', cached_keys{index}, key);
     end
 
-    cached_lines{cached_last_index}(line)=true;
-
-
-function [index, found]=find_key(haystack,needle)
-    % binary search for needle in haystack
-    %
-    % - if needle is in haystack, then haystack{index}==needle and
-    %   found=true
-    % - otherwise, haystack{p} < needle for all p < index,
-    %   haystack{p} > needle for all p >= index, and found=false
-
-    n=numel(haystack);
-
-    if n==0
-        index=1;
-        found=false;
-        return;
+    if numel(cached_line_count{index})<line
+        cached_line_count{index}(2*line)=0;
     end
-
-    needle_cell={needle};
-
-    if is_less(needle_cell,haystack(1))
-        index=1;
-        found=false;
-    elseif is_less(haystack(end),needle_cell)
-        index=n+1;
-        found=false;
-    else
-        first=1;
-        last=n;
-
-        while first<last
-            index=floor((first+last)/2);
-            if index==first
-                break;
-            end
-
-            if is_less_or_equal(needle_cell,haystack(index));
-                last=index;
-            else
-                first=index;
-            end
-        end
-
-        if isequal(haystack{index},needle)
-            index=first;
-        else
-            index=last;
-        end
-
-        found=isequal(haystack{index},needle);
-
-    end
-
-
-
-function tf=is_less(a,b)
-    tf=is_less_or_equal(a,b) && ~isequal(a,b);
-
-function tf=is_less_or_equal(a,b)
-     [unused,i]=sort([a,b]);
-     tf=i(1)==1;
-
-
-
-
-
-
+    cached_line_count{index}(line)=cached_line_count{index}(line)+count;

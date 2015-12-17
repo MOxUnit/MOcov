@@ -39,8 +39,9 @@ function res=mocov_find_files(root_dir, file_pat, monitor)
              regexptranslate('wildcard',file_pat) ...
              '$'];   % end of the string
 
+
     if ~isempty(monitor)
-        msg=sprintf('Finding files matching %s from %s', root_dir);
+        msg=sprintf('Finding files matching %s from %s',file_pat,root_dir);
         notify(monitor, msg);
     end
 
