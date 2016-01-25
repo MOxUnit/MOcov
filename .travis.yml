@@ -25,25 +25,17 @@ before_install:
     # install MOxUnit
     - cd ..
     - rm -rf MOxUnit
-    - git clone -b coverage https://github.com/nno/MOxUnit.git
+    - git clone -b coverage https://github.com/MOxUnit/MOxUnit.git
     - make -C MOxUnit install
-    - cd MOCov
-    # generate .xml file when running on shippable.com
-    - if [[  "$SHIPPABLE" == "true"  ]];  then
-          TEST_ARGS=JUNIT_XML=shippable/testresults/testresults.xml;
-      fi
+    # cd back to original directory 
+    - cd MOcov
 
 script:
-    - make install
-    - cd ../MOxUnit
-    - echo ${ROOTDIR}
-    - pwd
     - if [[  "$SHIPPABLE" == "true"  ]]; then
-          make test COVERAGE_DIR=`pwd`/MOxUnit JUNIT_XML=../MOcov/shippable/testresults/testresults.xml COBERTURA_XML=../MOcov/shippable/codecoverage/coverage.xml ;
+          make test JUNIT_XML=../MOcov/shippable/testresults/testresults.xml;
       fi
     - if [[  "$TRAVIS" == "true"  ]]; then
-          make test COVERAGE_DIR=`pwd`/MOxUnit COVERALLS_JSON=coveralls.json ;
-          curl --verbose -F 'json_file=@coveralls.json' https://coveralls.io/api/v1/jobs;
+          make test;
       fi
 
 
