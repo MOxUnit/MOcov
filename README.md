@@ -2,6 +2,7 @@
 
 MOcov is a coverage report generator for Matlab and GNU Octave.
 
+
 ### Features
 
 - Runs on both the [Matlab] and [GNU Octave] platforms.
@@ -35,6 +36,7 @@ MOcov is a coverage report generator for Matlab and GNU Octave.
         savepath            % save the path
         ```
 
+
 ### Generating coverage reports
 
 There are two methods to generate coverage while evaluating a particular expression:
@@ -42,6 +44,7 @@ There are two methods to generate coverage while evaluating a particular express
 1) the 'file' method takes a directory with files for which coverage is to be determined, rewrites all files in that directory so that coverage of each line is recorded, stores them in a temporary directory, and adds the temporary directory to the path. (After coverage reportes have been generated, the temporary files are deleted and the path is restored). This method runs on both GNU Octave and Matlab, but is typically slow.
 
 2) the 'profile' method uses the Matlab profiler. This method runs on Matlab only, but is generally faster.
+
 
 ### Use cases
 
@@ -97,8 +100,14 @@ Typical use cases for MOcov are:
 ### Use with travis-ci and Shippable
 MOcov can be used with the [Travis-ci] and [Shippable] services for continuous integration testing. This is achieved by setting up a `travis.yml` file. Due to recursiveness issues, MOcov cannot use these services to generate coverage reports for itself; but for an example, see the [MOxUnit .travis.yml] file.
 
+
 ### Compatibility notes
 - Because GNU Octave 3.8 and 4.0 do not support `classdef` syntax, 'old-style' object-oriented syntax is used for the class definitions. 
+
+
+### Limitations
+- The 'file' method uses a very simple parser, which may not work as expected in all cases.
+- Currently there is only support to generate coverage reports for files in a single directory (and its subdirectory).
 
 
 ### Contact
