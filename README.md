@@ -6,7 +6,9 @@ MOcov is a coverage report generator for Matlab and GNU Octave.
 
 - Runs on both the [Matlab] and [GNU Octave] platforms.
 - Can be used directly with continuous integration services, such as [coveralls-io] and [Shippable].
-- Integrates with MOxUnit, a unit test framework for Matlab and GNU Octave
+- Integrates with MOxUnit, a unit test framework for Matlab and GNU Octave.
+- Supports the Matlab profiler.
+- Writes coverage reports in HTML, JSON and XML formats.
 - Distributed under the MIT license, a permissive free software license.
 
 
@@ -37,7 +39,7 @@ MOcov is a coverage report generator for Matlab and GNU Octave.
 
 There are two methods to generate coverage while evaluating a particular expression:
 
-1) the 'file' method takes a directory with files for which coverage is to be determined, rewrites all files in that directory so that coverage of each line is recorded, stores them in a temporary directory, and adds the temporary directory to the path. This method runs on both GNU Octave and Matlab, but is typically slow.
+1) the 'file' method takes a directory with files for which coverage is to be determined, rewrites all files in that directory so that coverage of each line is recorded, stores them in a temporary directory, and adds the temporary directory to the path. (After coverage reportes have been generated, the temporary files are deleted and the path is restored). This method runs on both GNU Octave and Matlab, but is typically slow.
 
 2) the 'profile' method uses the Matlab profiler. This method runs on Matlab only, but is generally faster.
 
@@ -56,11 +58,11 @@ Typical use cases for MOcov are:
                 '-method','file');
     ```
 
-    to generate coverage reports for all files in the `'path/with/code'` directory when `running eval('run_test_command')`. Results are stored in JSON, XML and HTML formats. On the Matlab platform, the instead of `'method','file'` also `'method','profile'` can be used.
+    to generate coverage reports for all files in the `'path/with/code'` directory when `running eval('run_test_command')`. Results are stored in JSON, XML and HTML formats.
 
 -   as a specific example of the use case above, when using the [MOxUnit] unit test platform such tests can be run as
 
-    ```
+    ```matlab
         success=moxunit_runtests('path/with/tests',...
                                     '-with_coverage',...
                                     '-cover','/path/with/code',...
@@ -70,7 +72,27 @@ Typical use cases for MOcov are:
 
     where `'path/with/tests'` contains unit tests. 
 
--   use with continuous integration service, such as shippable.com or travis-ci combined iwth coveralls.io. See the .travis.yml in the MOxUnit project for an example. 
+-   On the Matlab platform, results from `profile('info')` can be stored in JSON, XML or HTML formats directly. In the following:
+
+    ```matlab
+        % enable profiler
+        profile on;
+
+        % run code for which coverage is to be determined
+        <your code here>
+
+        % write coverage based on profile('info')
+        mocov('-cover','path/with/code',...
+                '-profile_info',...
+                '-cover_json_file','coverage.json',...
+                '-cover_xml_file','coverage.xml',...
+                '-cover_html_dir','coverage_html',
+                '-method','file');
+    ```
+
+    coverage results are stored in JSON, XML and HTML formats.
+
+-   use with continuous integration service, such as [Shippable] or [travis-ci] combined with [coveralls.io]. See the .travis.yml in the MOxUnit project for an example.
 
 
 ### Use with travis-ci and Shippable
@@ -80,11 +102,6 @@ Due to recursiveness issues, MOcov cannot use these services to generate coverag
 
 ### Compatibility notes
 - Because GNU Octave 3.8 and 4.0 do not support `classdef` syntax, 'old-style' object-oriented syntax is used for the class definitions. 
-
-### Limitations
-Currently MOxUnit does not support:
-- Documentation tests (these would require `evalc`, which is not available on `GNU Octave` as of January 2014).
-- Support for setup and teardown functions in `TestCase` classes.
 
 
 ### Contact
@@ -123,6 +140,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [MOxUnit]: https://github.com/MOxUnit/MOxUnit
 [MOxUnit .travis.yml]: https://github.com/MOxUnit/MOxUnit/blob/master/.travis.yml
 [Travis-ci]: https://travis-ci.org
+[coveralls.io]: https://coveralls.io/
 [travis.yml configuration file]: https://docs.travis-ci.com/user/customizing-the-build/
 [Shippable]: https://shippable.com
 
