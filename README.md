@@ -47,7 +47,7 @@ There are two methods to generate coverage while evaluating a particular express
 
 Typical use cases for MOcov are:
 
--   locally run code with coverage for code in a unit test framework on GNU Octave or Matlab. Use
+-   Locally run code with coverage for code in a unit test framework on GNU Octave or Matlab. Use
 
     ```matlab    
         mocov('-cover','path/with/code',...
@@ -60,7 +60,7 @@ Typical use cases for MOcov are:
 
     to generate coverage reports for all files in the `'path/with/code'` directory when `running eval('run_test_command')`. Results are stored in JSON, XML and HTML formats.
 
--   as a specific example of the use case above, when using the [MOxUnit] unit test platform such tests can be run as
+-   As a specific example of the use case above, when using the [MOxUnit] unit test platform such tests can be run as
 
     ```matlab
         success=moxunit_runtests('path/with/tests',...
@@ -70,7 +70,7 @@ Typical use cases for MOcov are:
                                     '-cover_html_dir','coverage_html');
     ```
 
-    where `'path/with/tests'` contains unit tests. 
+    where `'path/with/tests'` contains unit tests. In this case, `moxunit_runtests` will call the `mocov` function to generate coverage reports.
 
 -   On the Matlab platform, results from `profile('info')` can be stored in JSON, XML or HTML formats directly. In the following:
 
@@ -86,19 +86,16 @@ Typical use cases for MOcov are:
                 '-profile_info',...
                 '-cover_json_file','coverage.json',...
                 '-cover_xml_file','coverage.xml',...
-                '-cover_html_dir','coverage_html',
-                '-method','file');
+                '-cover_html_dir','coverage_html');
     ```
 
     coverage results are stored in JSON, XML and HTML formats.
 
--   use with continuous integration service, such as [Shippable] or [travis-ci] combined with [coveralls.io]. See the .travis.yml in the MOxUnit project for an example.
+-   Use with continuous integration service, such as [Shippable] or [travis-ci] combined with [coveralls.io]. See the  in the MOxUnit project for an example.
 
 
 ### Use with travis-ci and Shippable
-MOcov can be used with the [Travis-ci] and [Shippable] service for continuous integration testing. This is achieved by setting up a [.travis.yml configuration file](.travis.yml).
-
-Due to recursiveness issues, MOcov cannot use these services to generate coverage reports for itself. For an example, see the [MOxUnit .travis.yml] file.
+MOcov can be used with the [Travis-ci] and [Shippable] services for continuous integration testing. This is achieved by setting up a `travis.yml` file. Due to recursiveness issues, MOcov cannot use these services to generate coverage reports for itself; but for an example, see the [MOxUnit .travis.yml] file.
 
 ### Compatibility notes
 - Because GNU Octave 3.8 and 4.0 do not support `classdef` syntax, 'old-style' object-oriented syntax is used for the class definitions. 
