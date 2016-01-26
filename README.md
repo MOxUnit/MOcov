@@ -6,8 +6,8 @@ MOcov is a coverage report generator for Matlab and GNU Octave.
 ### Features
 
 - Runs on both the [Matlab] and [GNU Octave] platforms.
-- Can be used directly with continuous integration services, such as [coveralls-io] and [Shippable].
-- Integrates with MOxUnit, a unit test framework for Matlab and GNU Octave.
+- Can be used directly with continuous integration services, such as [coveralls.io] and [Shippable].
+- Integrates with [MOxUnit], a unit test framework for Matlab and GNU Octave.
 - Supports the Matlab profiler.
 - Writes coverage reports in HTML, JSON and XML formats.
 - Distributed under the MIT license, a permissive free software license.
@@ -22,13 +22,13 @@ MOcov is a coverage report generator for Matlab and GNU Octave.
     cd MOcov
     make install
     ```
-    This will add the MOxUnit directory to the Matlab and/or GNU Octave searchpath. If both Matlab and GNU Octave are available on your machine, it will install MOxUnit for both.
+    This will add the MOcov directory to the Matlab and/or GNU Octave search path. If both Matlab and GNU Octave are available on your machine, it will install MOcov for both.
 
 - Manual installation:
 
-    + Download the zip archive from the [MOxUnit] website.
+    + Download the zip archive from the [MOcov] website.
     + Start Matlab or GNU Octave.
-    + On the Matlab or GNU Octave prompt, `cd` to the `MOxUnit` root directory, then run:
+    + On the Matlab or GNU Octave prompt, `cd` to the `MOcov` root directory, then run:
     
         ```matlab
         cd MOcov            % cd to MOcov subdirectory
@@ -37,11 +37,23 @@ MOcov is a coverage report generator for Matlab and GNU Octave.
         ```
 
 
-### Generating coverage reports
+### Determining coverage
 
-There are two methods to generate coverage while evaluating a particular expression:
+Coverage can be determined for evaluating a single expression or evaluation of a single function handle; for typical use cases this invokes running a test suite. 
 
-1) the 'file' method takes a directory with files for which coverage is to be determined, rewrites all files in that directory so that coverage of each line is recorded, stores them in a temporary directory, and adds the temporary directory to the path. (After coverage reportes have been generated, the temporary files are deleted and the path is restored). This method runs on both GNU Octave and Matlab, but is typically slow.
+There are two methods to generate coverage while evaluating such an expression or function handle:
+
+1) the 'file' method (default):
+    
+    - Coverage information is stored internally by the function `mocov_line_covered`, which keeps this information through the use of persistent variables. Initially the coverage information is reset to being empty.
+    - This method considers all files in a directory (and its subdirectories).
+    - A temporary directory is created where modified versions of each file is stored.
+    - Prior to evaluting the expression or function handle, for each file, MOcov determines which of its lines can be executed. Each line that can be executed is prefixed by a call to `mocov_line_covered`, which cause it to update internal state to record the filename and line number that was executed, and the result stored in the temporary directory.
+    - The search path is updated to include the new temporary directory.
+    
+    After evaluating the expression or function handle, the temporary directory is deleted and the search path restored. Line coverage information is then extracted from the internal state of `mocov_line_covered`.
+    
+    This method runs on both GNU Octave and Matlab, but is typically slow.
 
 2) the 'profile' method uses the Matlab profiler. This method runs on Matlab only, but is generally faster.
 
@@ -94,11 +106,11 @@ Typical use cases for MOcov are:
 
     coverage results are stored in JSON, XML and HTML formats.
 
--   Use with continuous integration service, such as [Shippable] or [travis-ci] combined with [coveralls.io]. See the  in the MOxUnit project for an example.
+-   Use with continuous integration service, such as [Shippable] or [travis-ci] combined with [coveralls.io]. See the   [travis.yml configuration file] in the [MOxUnit] project for an example.
 
 
 ### Use with travis-ci and Shippable
-MOcov can be used with the [Travis-ci] and [Shippable] services for continuous integration testing. This is achieved by setting up a `travis.yml` file. Due to recursiveness issues, MOcov cannot use these services to generate coverage reports for itself; but for an example, see the [MOxUnit .travis.yml] file.
+MOcov can be used with the [Travis-ci] and [Shippable] services for continuous integration testing. This is achieved by setting up a `travis.yml` file. Due to recursiveness issues, MOcov cannot use these services to generate coverage reports for itself; for an example in the related [MOxUnit] project, see the [travis.yml configuration file] file.
 
 
 ### Compatibility notes
