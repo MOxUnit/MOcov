@@ -159,7 +159,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [MOxUnit .travis.yml]: https://github.com/MOxUnit/MOxUnit/blob/master/.travis.yml
 [Travis-ci]: https://travis-ci.org
 [coveralls.io]: https://coveralls.io/
-[travis.yml configuration file]: https://docs.travis-ci.com/user/customizing-the-build/
+[travis.yml configuration file]: https://github.com/MOxUnit/MOxUnit/blob/master/.travis.yml
 [Shippable]: https://shippable.com
 
 
