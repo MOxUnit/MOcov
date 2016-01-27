@@ -43,7 +43,8 @@ Coverage can be determined for evaluating a single expression or evaluation of a
 
 There are two methods to generate coverage while evaluating such an expression or function handle:
 
-1) the 'file' method (default).
+1. the 'file' method (default)
+
     - Coverage information is stored internally by the function `mocov_line_covered`, which keeps this information through the use of persistent variables. Initially the coverage information is reset to being empty.
     - This method considers all files in a directory (and its subdirectories).
     - A temporary directory is created where modified versions of each file is stored.
@@ -54,7 +55,7 @@ There are two methods to generate coverage while evaluating such an expression o
     
     This method runs on both GNU Octave and Matlab, but is typically slow.
 
-2) the 'profile' method. 
+2. the 'profile' method
     - It uses the Matlab profiler. 
     - This method runs on Matlab only (not on GNU Octave), but is generally faster.
 
@@ -162,5 +163,4 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 [coveralls.io]: https://coveralls.io/
 [travis.yml configuration file]: https://github.com/MOxUnit/MOxUnit/blob/master/.travis.yml
 [Shippable]: https://shippable.com
-
 
