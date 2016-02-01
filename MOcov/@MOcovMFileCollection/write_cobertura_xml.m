@@ -54,7 +54,7 @@ function write_to_file(fn,s)
 function coverage=compute_coverage(obj)
 
     numerator=0;
-    denumerator=0;
+    denominator=0;
 
     for k=1:numel(obj.mfiles)
         mfile=obj.mfiles{k};
@@ -63,9 +63,9 @@ function coverage=compute_coverage(obj)
         ed=get_lines_executed(mfile);
 
         numerator=numerator+sum(ed & able);
-        denumerator=denumerator+sum(able);
+        denominator=denominator+sum(able);
     end
 
-    coverage=numerator/denumerator;
+    coverage=numerator/denominator;
 
 
