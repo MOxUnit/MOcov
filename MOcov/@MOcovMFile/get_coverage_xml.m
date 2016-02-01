@@ -54,4 +54,10 @@ function xml=get_reportable_lines_xml(obj)
 
 function r=get_coverage_ratio(obj)
     executable=get_lines_executable(obj);
-    r=sum(get_lines_executed(obj) & executable) / sum(executable);
+    numerator = sum(get_lines_executed(obj) & executable);
+    denominator = sum(executable);
+    if denominator==0
+        r=1;
+    else
+        r=numerator/denominator;
+    end

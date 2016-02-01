@@ -96,7 +96,11 @@ function stats=get_stats(mfiles)
 
         executed(~executable)=false;
 
-        coverage=100*sum(executed)/sum(executable);
+        if sum(executable)==0
+            coverage=100;
+        else
+            coverage=100*sum(executed)/sum(executable);
+        end
 
         stat=[numel(executable),...
                      sum(executable),...
