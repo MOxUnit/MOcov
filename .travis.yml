@@ -33,8 +33,7 @@ before_install:
 script:
     - if [[  "$SHIPPABLE" == "true"  ]]; then
           make test JUNIT_XML=../MOcov/shippable/testresults/testresults.xml;
-      fi
-    - if [[  "$TRAVIS" == "true"  ]]; then
+      elif [[  "$TRAVIS" == "true"  ]]; then
           make test;
       fi
 
