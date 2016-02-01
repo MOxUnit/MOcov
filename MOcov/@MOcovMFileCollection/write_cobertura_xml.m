@@ -66,6 +66,10 @@ function coverage=compute_coverage(obj)
         denominator=denominator+sum(able);
     end
 
-    coverage=numerator/denominator;
+    if denominator==0
+        coverage=1;
+    else
+        coverage=numerator/denominator;
+    end
 
 
