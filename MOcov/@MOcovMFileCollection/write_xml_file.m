@@ -71,7 +71,7 @@ function write_to_file(fn,s)
 function coverage=compute_coverage(obj)
 % compute overall coverage across all files
     numerator=0;
-    denumerator=0;
+    denominator=0;
 
     for k=1:count_mfiles(obj)
         mfile=get_mfile(obj,k);
@@ -80,9 +80,9 @@ function coverage=compute_coverage(obj)
         executed=get_lines_executed(mfile);
 
         numerator=numerator+sum(executed & executable);
-        denumerator=denumerator+sum(executable);
+        denominator=denominator+sum(executable);
     end
 
-    coverage=numerator/denumerator;
+    coverage=numerator/denominator;
 
 
