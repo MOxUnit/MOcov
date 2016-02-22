@@ -1,4 +1,4 @@
-function res=mocov_find_files(root_dir, file_pat, monitor)
+function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
 % Finds files recursively in a directory
 %
 % res=mocov_find_files([root_dir[, file_pat]])
@@ -12,6 +12,7 @@ function res=mocov_find_files(root_dir, file_pat, monitor)
 %                       is used, corresponding to all files.
 %   monitor             Optional progress monitory that supports a
 %                       'notify' method.
+%   exclude_pat         Optional cell array of patterns to exclude.
 %
 % Output:
 %   res                 Kx1 cell with names of files in root_dir matching
@@ -35,10 +36,28 @@ function res=mocov_find_files(root_dir, file_pat, monitor)
         monitor=[];
     end
 
+    if nargin<4
+        exclude_pat={};
+    end
+
+    if ischar(exclude_pat)
+        exclude_pat={exclude_pat};
+    end
+
     file_re=['^' ... % start of the string
              regexptranslate('wildcard',file_pat) ...
              '$'];   % end of the string
 
+     exclude_re='';
+     for k=1:numel(exclude_pat)
+         if ~isempty(exclude_re)
+             exclude_re=[exclude_re '|'];
+         end
+         exclude_re=[exclude_re ...
+                     '^' ... % start of the string
+                     regexptranslate('wildcard',exclude_pat{k}) ...
+                     '$'];   % end of the string
+     end
 
     if ~isempty(monitor)
         msg=sprintf('Finding files matching %s from %s',file_pat,root_dir);
@@ -47,7 +66,7 @@ function res=mocov_find_files(root_dir, file_pat, monitor)
 
     res=find_files_recursively(root_dir,file_re,monitor);
 
-function res=find_files_recursively(root_dir,file_re,monitor)
+function res=find_files_recursively(root_dir,file_re,monitor,exclude_re)
     if isempty(root_dir)
         dir_arg={};
     else
@@ -67,7 +86,9 @@ function res=find_files_recursively(root_dir,file_re,monitor)
         if ~ignore_fn
             path_fn=fullfile(root_dir, fn);
 
-            if isdir(path_fn)
+            if ~isempty(regexp(fn,exclude_re,'once'));
+                continue;
+            elseif isdir(path_fn)
                 res=find_files_recursively(path_fn,file_re,monitor);
             elseif ~isempty(regexp(fn,file_re,'once'));
                 res={path_fn};
