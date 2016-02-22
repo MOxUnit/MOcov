@@ -16,6 +16,10 @@ function varargout=mocov(varargin)
 %                               Mutually exclusive with '-e' option.
 %   '-cover', covd              Find coverage for files in dir covd and all
 %                               of its subdirectories
+%   '-cover_exclude', pat       (optional) Exclude files and directories
+%                               which match this pattern, even if they are
+%                               in covd. Can be used multiple times to
+%                               specify multiple patterns to match.
 %   '-cover_json_file', cj      (optional) Store coverage information in
 % `                             file cj in JSON format [use with coveralls]
 %   '-cover_xml_file', xc       (optional) Store coverage information in
@@ -81,7 +85,8 @@ function varargout=mocov(varargin)
     monitor=MOcovProgressMonitor(opt.verbose);
     mfile_collection=MOcovMFileCollection(opt.cover,...
                                                     opt.method,...
-                                                    monitor);
+                                                    monitor,...
+                                                    opt.excludes);
     mfile_collection=prepare(mfile_collection);
     cleaner_collection=onCleanup(@()cleanup(mfile_collection));                                                    
 
@@ -151,6 +156,7 @@ function opt=parse_inputs(varargin)
 
     defaults=struct();
     defaults.coverage_dir=pwd();
+    defaults.excludes={};
     defaults.html_dir=[];
     defaults.cobertura_xml=[];
     defaults.coveralls_json=[];
@@ -184,6 +190,10 @@ function opt=parse_inputs(varargin)
                 case '-cover'
                     k=k+1;
                     opt.cover=varargin{k};
+
+                case '-cover_exclude'
+                    k=k+1;
+                    opt.excludes(end+1)=varargin(k);
 
                 case '-verbose'
                     opt.verbose=opt.verbose+1;

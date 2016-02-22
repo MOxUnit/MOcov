@@ -14,7 +14,7 @@ function obj=prepare(obj)
 
     monitor=obj.monitor;
 
-    fns=mocov_find_files(obj.root_dir,'*.m',monitor);
+    fns=mocov_find_files(obj.root_dir,'*.m',monitor,obj.exclude_pat);
     n=numel(fns);
 
     mfiles=cell(n,1);
