@@ -128,6 +128,10 @@ MOcov can be used with the [Travis-ci] and [Shippable] services for continuous i
 Nikolaas N. Oosterhof, nikolaas dot oosterhof at unitn dot it
 
 
+### Contributions
+- Thanks to Scott Lowe for his contributions.
+
+
 ### License
 
 (The MIT License)
