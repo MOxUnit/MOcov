@@ -66,7 +66,7 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
         notify(monitor, msg);
     end
 
-    res=find_files_recursively(root_dir,file_re,monitor);
+    res=find_files_recursively(root_dir,file_re,monitor,exclude_re);
 
 function res=find_files_recursively(root_dir,file_re,monitor,exclude_re)
     if isempty(root_dir)
