@@ -12,7 +12,9 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
 %                       is used, corresponding to all files.
 %   monitor             Optional progress monitory that supports a
 %                       'notify' method.
-%   exclude_pat         Optional cell array of patterns to exclude.
+%   exclude_pat         Optional cell array of patterns to exclude. Both
+%                       files and directories which match one of these
+%                       patterns will be omitted from the output.
 %
 % Output:
 %   res                 Kx1 cell with names of files in root_dir matching
