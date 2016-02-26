@@ -89,7 +89,7 @@ function res=find_files_recursively(root_dir,file_re,monitor,exclude_re)
             if ~isempty(regexp(fn,exclude_re,'once'));
                 continue;
             elseif isdir(path_fn)
-                res=find_files_recursively(path_fn,file_re,monitor);
+                res=find_files_recursively(path_fn,file_re,monitor,exclude_re);
             elseif ~isempty(regexp(fn,file_re,'once'));
                 res={path_fn};
                 if ~isempty(monitor)
