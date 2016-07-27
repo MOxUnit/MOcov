@@ -56,7 +56,7 @@ function params=get_service_params()
     if isequal(getenv('TRAVIS'),'true')
         params.service_name='travis-ci';
         params.job_id=getenv('TRAVIS_JOB_ID');
-        params.parallel=getenv('TRAVIS_PARALLEL');
+        params.parallel=getenv('COVERALLS_PARALLEL');
         return;
     end
 
@@ -65,7 +65,7 @@ function params=get_service_params()
 
 function misc_data=get_misc_data(params)
     misc_data_cell=cell(0);
-    if isfield(params,'parallel')
+    if isfield(params,'parallel') && ~isempty(params.parallel)
         % attempt to support parallel
         misc_data_cell{end+1}=sprintf('"parallel": %s,\n',...
                 lower(params.parallel));
