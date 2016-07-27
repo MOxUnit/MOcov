@@ -10,10 +10,12 @@ function varargout=mocov(varargin)
 %                               - If a string, evaluate the expression expr
 %                                 using 'eval'
 %                               - If a function handle, evaluate expr()
-%                               Mutually exclusive with '-i' option.
+%                               Mutually exclusive with '-profile_info'
+%                               option.
 %   '-profile_info'             Use coverage based on profile('info'). Not
 %                               usable on the GNU Octave platform.
-%                               Mutually exclusive with '-e' option.
+%                               Mutually exclusive with '-expression'
+%                               option.
 %   '-cover', covd              Find coverage for files in dir covd and all
 %                               of its subdirectories
 %   '-cover_exclude', pat       (optional) Exclude files and directories
@@ -42,17 +44,17 @@ function varargout=mocov(varargin)
 %
 % Examples:
 %   % evaluate 'expr' while monitoring coverage of files in directory
-%   % 'dir_to_cover' by rewriting files in that directory to a 
+%   % 'dir_to_cover' by rewriting files in that directory to a
 %   % temporary directory; write coverage in HTML format in directory
-%   % 'html_output'. 
+%   % 'html_output'.
 %   mocov -cover dir_to_cover -cover_html_dir html_output -e expr
 %
 %   % As above, but use Matlab profiler to monitor coverage
 %   % (not usable on GNU Octave)
 %   mocov -cover cover_dir -cover_html_dir output -e expr -v -m profile
 %
-%   
-%   
+%
+%
 % Notes:
 % - this function aims to be compatible with Matlab and GNU Octave.
 % - coverage reports for unit tests can be made together with MOxUnit.
@@ -72,7 +74,7 @@ function varargout=mocov(varargin)
 
     % get input arguments
     opt=parse_inputs(varargin{:});
-    
+
     % store original state of mocov_line_covered, and ensure it is reset
     % afterwards
     line_covered_state=mocov_line_covered();
@@ -81,19 +83,19 @@ function varargout=mocov(varargin)
 
     % reset lines covered to empty
     mocov_line_covered([]);
-    
+
     monitor=MOcovProgressMonitor(opt.verbose);
     mfile_collection=MOcovMFileCollection(opt.cover,...
                                                     opt.method,...
                                                     monitor,...
                                                     opt.excludes);
     mfile_collection=prepare(mfile_collection);
-    cleaner_collection=onCleanup(@()cleanup(mfile_collection));                                                    
+    cleaner_collection=onCleanup(@()cleanup(mfile_collection));
 
     if ~isempty(opt.expression)
         % rewrite m-files (if method='file') and ensure that they are cleaned
         % up afterwards
-        
+
         % evaluate expression, and assign output variables
         argout=evaluate_expression(opt.expression);
         n=numel(argout);
@@ -205,7 +207,7 @@ function opt=parse_inputs(varargin)
                 case '-cover_method'
                     k=k+1;
                     opt.method=varargin{k};
-                    
+
                 case '-profile_info'
                     opt.info_from_profile=true;
 
@@ -226,7 +228,7 @@ function opt=parse_inputs(varargin)
             opt.method='file';
         end
     end
-    
+
     check_inputs(opt);
 
 
@@ -247,4 +249,3 @@ function check_inputs(opt)
     elseif opt.info_from_profile
         error('Options ''-e'' or ''i'' are mutually exclusive');
     end
-       
