@@ -46,10 +46,7 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
         exclude_pat={exclude_pat};
     end
 
-    file_re=['^' ... % start of the string
-             regexptranslate('wildcard',file_pat) ...
-             '$'];   % end of the string
-
+    file_re=pattern2re(file_pat);
     exclude_re=get_exclude_re(exclude_pat);
 
     if ~isempty(monitor)
@@ -58,6 +55,12 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
     end
 
     res=find_files_recursively(root_dir,file_re,monitor,exclude_re);
+    
+    
+function re=pattern2re(pat)
+    re=['^' ... % start of the string
+        regexptranslate('wildcard',pat) ...
+        '$'];   % end of the string
 
 function re=get_exclude_re(exclude_pat)
     n=numel(exclude_pat);
@@ -66,18 +69,11 @@ function re=get_exclude_re(exclude_pat)
         return;
     end
 
-    excl_re_cell=cell(n,1);
-    for k=1:n
-        re_k=['^' ... % start of the string
-             regexptranslate('wildcard',exclude_pat{k}) ...
-             '$'];  % end of the string
-        excl_re_cell{k}=re_k;
-    end
-
+    excl_re_cell=cellfun(@pattern2re,exclude_pat,...
+                        'UniformOutput',false);
+    
     joined=sprintf('|%s',excl_re_cell{:});
     re=joined(2:end);
-
-
 
 
 function res=find_files_recursively(root_dir,file_re,monitor,exclude_re)
