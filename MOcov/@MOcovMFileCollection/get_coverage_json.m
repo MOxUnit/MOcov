@@ -28,7 +28,7 @@ function json=get_coverage_json(obj)
                                 'UniformOutput',false);
     source_files_json=strjoin(source_files_json_cell,',');
 
-    misc_data=get_misc_data(params);
+    misc_data=get_misc_data(service);
 
     json=sprintf(['{ \n',...
                     '"service_job_id": "%s",\n',...
@@ -67,7 +67,7 @@ function misc_data=get_misc_data(params)
     misc_data_cell=cell(0);
     if isfield(params,'parallel')
         % attempt to support parallel
-        misc_data_cell{end+1}=sprintf(',"parallel": %s\n',...
+        misc_data_cell{end+1}=sprintf('"parallel": %s,\n',...
                 lower(params.parallel));
     end
     misc_data=sprintf('%s',misc_data_cell{:});

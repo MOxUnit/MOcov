@@ -50,23 +50,35 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
              regexptranslate('wildcard',file_pat) ...
              '$'];   % end of the string
 
-     exclude_re='';
-     for k=1:numel(exclude_pat)
-         if ~isempty(exclude_re)
-             exclude_re=[exclude_re '|'];
-         end
-         exclude_re=[exclude_re ...
-                     '^' ... % start of the string
-                     regexptranslate('wildcard',exclude_pat{k}) ...
-                     '$'];   % end of the string
-     end
+    exclude_re=get_exclude_re(exclude_pat);
 
     if ~isempty(monitor)
         msg=sprintf('Finding files matching %s from %s',file_pat,root_dir);
         notify(monitor, msg);
     end
 
-    res=find_files_recursively(root_dir,file_re,monitor);
+    res=find_files_recursively(root_dir,file_re,monitor,exclude_re);
+
+function re=get_exclude_re(exclude_pat)
+    n=numel(exclude_pat);
+    if n==0
+        re='';
+        return;
+    end
+
+    excl_re_cell=cell(n,1);
+    for k=1:n
+        re_k=['^' ... % start of the string
+             regexptranslate('wildcard',exclude_pat{k}) ...
+             '$'];  % end of the string
+        excl_re_cell{k}=re_k;
+    end
+
+    joined=sprintf('|%s',excl_re_cell{:});
+    re=joined(2:end);
+
+
+
 
 function res=find_files_recursively(root_dir,file_re,monitor,exclude_re)
     if isempty(root_dir)
@@ -91,7 +103,8 @@ function res=find_files_recursively(root_dir,file_re,monitor,exclude_re)
             if ~isempty(regexp(fn,exclude_re,'once'));
                 continue;
             elseif isdir(path_fn)
-                res=find_files_recursively(path_fn,file_re,monitor,exclude_re);
+                res=find_files_recursively(path_fn,file_re,...
+                                                monitor,exclude_re);
             elseif ~isempty(regexp(fn,file_re,'once'));
                 res={path_fn};
                 if ~isempty(monitor)
