@@ -89,9 +89,16 @@ function test_properties_line_not_executable
     mfile = MOcovMFile(tempfile);
     lines = get_lines(mfile);
     executable_lines = get_lines_executable(mfile);
-    properties_lines = [3, 6];
+    properties_opening = [2, 5];
+    properties_body = [3, 6];
 
-    for n = properties_lines
+    for n = properties_opening
+      assertStringContains(lines{n}, 'properties');
+      assert(~executable_lines(n), ...
+          '`%s` line is wrongly classified as executable', lines{n});
+    end
+
+    for n = properties_body;
       assertStringContains(lines{n}, 'Prop;');
       assert(~executable_lines(n), ...
           '`%s` line is wrongly classified as executable', lines{n});
