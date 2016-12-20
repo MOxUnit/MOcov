@@ -33,9 +33,13 @@ function filepath = create_tempfile(filename, contents)
     fclose(fid);
 end
 
-function filepath = create_classdef
-    filepath = create_tempfile('AClass.m', [ ...
-        'classdef AClass < handle\n', ...
+function filepath = create_classdef(classname)
+    if nargin < 1
+      classname = 'AClass';
+    end
+
+    filepath = create_tempfile([classname, '.m'], [ ...
+        'classdef ', classname, ' < handle\n', ...
         '  properties\n', ...
         '    aProp;\n', ...
         '  end\n', ...
@@ -43,13 +47,13 @@ function filepath = create_classdef
         '    anotherProp;\n', ...
         '  end\n', ...
         '  methods\n', ...
-        '    function self = AClass\n', ...
-        '      fprintf(''hello world!'');\n', ...
+        '    function self =  ', classname, ' \n', ...
+        '      fprintf(0, ''hello world!'');\n', ...
         '    end\n', ...
         '  end\n', ...
-        '  methods (Access = private)\n', ...
+        '  methods (Access = public)\n', ...
         '    function x = aMethod(self)\n', ...
-        '      fprintf(''hello world!'');\n', ...
+        '      fprintf(0, ''hello world!'');\n', ...
         '    end\n', ...
         '  end\n', ...
         'end\n' ...
@@ -62,6 +66,8 @@ function assertStringContains(text, subtext)
 end
 
 function test_classdef_line_not_executable
+    % Test subject: `MOcovMFile` constructor
+
     tempfile = create_classdef;
     teardown = onCleanup(@() delete(tempfile));
 
@@ -75,6 +81,8 @@ function test_classdef_line_not_executable
 end
 
 function test_methods_opening_section_not_executable
+    % Test subject: `MOcovMFile` constructor
+
     tempfile = create_classdef;
     teardown = onCleanup(@() delete(tempfile));
 
@@ -91,6 +99,8 @@ function test_methods_opening_section_not_executable
 end
 
 function test_method_body_executable
+    % Test subject: `MOcovMFile` constructor
+
     tempfile = create_classdef;
     teardown = onCleanup(@() delete(tempfile));
 
@@ -107,6 +117,8 @@ function test_method_body_executable
 end
 
 function test_properties_line_not_executable
+    % Test subject: `MOcovMFile` constructor
+
     tempfile = create_classdef;
     teardown = onCleanup(@() delete(tempfile));
 
@@ -119,5 +131,44 @@ function test_properties_line_not_executable
       assertStringContains(lines{n}, 'Prop;');
       assert(~executable_lines(n), ...
           '`%s` line is wrongly classified as executable', lines{n});
+    end
+end
+
+function test_generate_valid_file
+    % Test subject: `write_lines_with_prefix` method
+
+    originalPath = path;
+    pathCleanup = onCleanup(@() path(originalPath));
+
+    % Given:
+
+    % `AClass.m` file with a classdef declaration
+    tempfile = create_classdef('AClass');
+    tempfileCleanup = onCleanup(@() delete(tempfile));
+
+    % a folder where mocov will store the decorated files
+    tempfolder = create_tempfolder(['mocovtest', num2str(randi(99999999999))]);
+    decorated = fullfile(tempfolder, 'AClass.m');
+    tempfolderCleanup = onCleanup(@() rmdir(tempfolder, 's'));
+
+    % a valid decorator
+    decorator = @(line_number) ...
+      sprintf('fprintf(0, ''%s:%d'');', tempfile, line_number);
+
+
+    % When: the decorated file is generated
+    mfile = MOcovMFile(tempfile);
+    write_lines_with_prefix(mfile, decorated, decorator);
+
+
+    % Then: the decorated file should have a valid syntax
+    % Since Octave do not have a linter, run the code to check the syntax.
+    addpath(tempfolder);
+    try
+      aObject = AClass();
+      aObject.aMethod();
+    catch
+      assert(false, ['Problems when running the decorated file: `%s` ', ...
+                     'please check for syntax errors.'], decorated);
     end
 end
