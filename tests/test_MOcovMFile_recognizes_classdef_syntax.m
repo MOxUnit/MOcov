@@ -2,37 +2,6 @@ function test_suite = test_MOcovMFile_recognizes_classdef_syntax
     initTestSuite;
 end
 
-function folderpath = create_tempfolder(foldername)
-    % Create a folder inside the default temporary director
-    % and returns it path.
-    %
-    % If the folder already exists, do nothing...
-
-    len = length(tempdir);
-    if length(foldername) >= len && strcmp(foldername(1:len), tempdir)
-        % Just ignore if foldername already include the tempdir path
-        folderpath = foldername;
-    else
-        folderpath = fullfile(tempdir, foldername);
-    end
-
-    [unused, unused, unused] = mkdir(folderpath);
-    % Avoid existing folder warnings by receiving all the 3 outputs of mkdir
-end
-
-
-function filepath = create_tempfile(filename, contents)
-    filepath = fullfile(tempdir, filename);
-
-    % Make sure eventual folder exists
-    tempfolder = fileparts(filepath);
-    create_tempfolder(tempfolder);
-
-    fid = fopen(filepath, 'w');
-    fprintf(fid, contents);
-    fclose(fid);
-end
-
 function filepath = create_classdef(classname)
     if nargin < 1
       classname = 'AClass';
@@ -58,11 +27,6 @@ function filepath = create_classdef(classname)
         '  end\n', ...
         'end\n' ...
     ]);
-end
-
-function assertStringContains(text, subtext)
-  assert(~isempty(strfind(text, subtext)), ...
-    'String ''%s'' should contain ''%s'', but it doesn''t.');
 end
 
 function test_classdef_line_not_executable
