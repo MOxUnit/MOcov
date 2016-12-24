@@ -7,11 +7,9 @@ MATLAB?=matlab
 OCTAVE?=octave
 
 TESTDIR=$(CURDIR)/tests
-SUPPORTDIR=$(TESTDIR)/support
 ROOTDIR=$(CURDIR)/MOcov
 
 ADDPATH=orig_dir=pwd();cd('$(ROOTDIR)');addpath(pwd);cd(orig_dir)
-ADDSUPPORT=orig_dir=pwd();cd('$(SUPPORTDIR)');addpath(pwd);cd(orig_dir)
 RMPATH=rmpath('$(ROOTDIR)');
 SAVEPATH=savepath();exit(0)
 
@@ -51,7 +49,7 @@ ifdef JUNIT_XML_FILE
 endif
 	
 
-TEST=$(ADDPATH);$(ADDSUPPORT);if(isempty(which('moxunit_runtests'))),error('MOxUnit is required; see https://github.com/MOxUnit/MOxUnit');end;success=moxunit_runtests($(RUNTESTS_ARGS));exit(~success);
+TEST=$(ADDPATH);if(isempty(which('moxunit_runtests'))),error('MOxUnit is required; see https://github.com/MOxUnit/MOxUnit');end;success=moxunit_runtests($(RUNTESTS_ARGS));exit(~success);
 
 MATLAB_BIN=$(shell which $(MATLAB))
 OCTAVE_BIN=$(shell which $(OCTAVE))
