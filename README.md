@@ -129,7 +129,7 @@ Nikolaas N. Oosterhof, nikolaas dot oosterhof at unitn dot it
 
 
 ### Contributions
-- Thanks to Scott Lowe for his contributions.
+- Thanks to Scott Lowe and Anderson Bravalheri for their contributions.
 
 
 ### License
