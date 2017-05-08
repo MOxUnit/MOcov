@@ -55,8 +55,8 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
     end
 
     res=find_files_recursively(root_dir,file_re,monitor,exclude_re);
-    
-    
+
+
 function re=pattern2re(pat)
     re=['^' ... % start of the string
         regexptranslate('wildcard',pat) ...
@@ -71,7 +71,7 @@ function re=get_exclude_re(exclude_pat)
 
     excl_re_cell=cellfun(@pattern2re,exclude_pat,...
                         'UniformOutput',false);
-    
+
     joined=sprintf('|%s',excl_re_cell{:});
     re=joined(2:end);
 

@@ -20,7 +20,9 @@ function md5=mocov_util_md5(filename)
 
 
 function md5=md5_from_file(fn)
-    md5_processors={@md5_builtin,@md5_shell};
+    md5_processors={@md5_builtin,...
+                    @hash_builtin,...
+                    @md5_shell};
 
     n=numel(md5_processors);
     for k=1:n
@@ -34,13 +36,28 @@ function md5=md5_from_file(fn)
     error('Unable to compute md5 - no method available');
 
 function [is_ok,md5]=md5_builtin(fn)
-% supported in GNU Octave
-    is_ok=~isempty(which('md5sum'));
+% supported in GNU Octave <= 4.6
+    is_ok=has_builtin_function('md5sum');
     if is_ok
         md5=md5sum(fn);
     else
         md5=[];
     end
+
+
+function [is_ok,md5]=hash_builtin(fn)
+% supported in GNU Octave >= 4.4
+
+    is_ok=has_builtin_function('hash') && has_builtin_function('fileread');
+    if is_ok
+        md5=hash('md5',fileread(fn));
+    else
+        md5=[];
+    end
+
+function tf=has_builtin_function(name)
+    tf=exist(name,'builtin');
+
 
 function [is_ok,md5]=md5_shell(fn)
 % supported on Unix platform
@@ -54,12 +71,4 @@ function [is_ok,md5]=md5_shell(fn)
     cmd=sprintf('md5 -q "%s"',fn);
     [status,md5]=unix(cmd);
     is_ok=status==0;
-
-
-
-
-
-
-
-
 
