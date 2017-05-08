@@ -5,7 +5,7 @@ function test_suite = test_mocov_line_covered
 function test_mocov_line_covered_basics()
     initial_state=mocov_line_covered();
     cleaner=onCleanup(@()mocov_line_covered(initial_state));
-    aet=@(varargin_assertExceptionThrown(@()...
+    aet=@(varargin)assertExceptionThrown(@()...
                         mocov_line_covered(varargin{:}));
 
     s=struct();
@@ -31,21 +31,31 @@ function test_mocov_line_covered_basics()
                 [0 0 1];...
                 [0 10 0 1]};
     s2=mocov_line_covered();
-
-    assertEqual(s.keys,s2.keys);
-    n=numel(s.line_count);
-    assertEqual(n,numel(s2.line_count));
-    for k=1:n
-        s_lines=s.line_count{k};
-        s2_lines=s2.line_count{k};
-
-        m=s_lines>0;
-        m2=s2_lines>0;
-
-        assertEqual(find(m),find(m2));
-        assertEqual(s_lines(m),s_lines(m2));
+    first_empty_pos=find(cellfun(@isempty,s2.keys),1);
+    if ~isempty(first_empty_pos)
+        s2.keys=s2.keys(1:(first_empty_pos-1));
     end
 
+    assert_cell_equal_or_empty(s.keys,s2.keys);
+    n=numel(s.line_count);
+
+    for k=1:n
+        s_lines=s.line_count{k};
+
+        s2_pos=strmatch(s.keys{k},s2.keys);
+        assert(numel(s2_pos)==1);
+
+        s2_lines=s2.line_count{s2_pos};
+
+        msk=s_lines>0;
+        msk2=s2_lines>0;
+
+        assertEqual(find(msk),find(msk2));
+        assertEqual(s_lines(msk),s_lines(msk2));
+    end
+
+function assert_cell_equal_or_empty(xs,ys)
+    assertEqual(sort(xs),sort(ys));
 
 
 
