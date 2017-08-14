@@ -22,6 +22,7 @@ function md5=mocov_util_md5(filename)
 function md5=md5_from_file(fn)
     md5_processors={@md5_builtin,...
                     @hash_builtin,...
+                    @md5sum_shell,...
                     @md5_shell};
 
     n=numel(md5_processors);
@@ -58,9 +59,8 @@ function [is_ok,md5]=hash_builtin(fn)
 function tf=has_builtin_function(name)
     tf=exist(name,'builtin');
 
-
-function [is_ok,md5]=md5_shell(fn)
-% supported on Unix platform
+function [is_ok,md5]=run_unix(cmd)
+% helper function
     is_ok=false;
     md5=[];
 
@@ -68,7 +68,19 @@ function [is_ok,md5]=md5_shell(fn)
         return;
     end
 
-    cmd=sprintf('md5 -q "%s"',fn);
     [status,md5]=unix(cmd);
     is_ok=status==0;
+
+function [is_ok,md5]=md5sum_shell(fn)
+% supported on Unix platform
+
+    cmd=sprintf('md5sum "%s"|cut -f1 -d" "',fn);
+    [is_ok,md5]=run_unix(cmd);
+
+
+function [is_ok,md5]=md5_shell(fn)
+% supported on Unix platform
+
+    cmd=sprintf('md5 -q "%s"',fn);
+    [is_ok,md5]=run_unix(cmd);
 
