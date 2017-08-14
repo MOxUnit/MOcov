@@ -74,8 +74,10 @@ function [is_ok,md5]=run_unix(cmd)
 function [is_ok,md5]=md5sum_shell(fn)
 % supported on Unix platform
 
-    cmd=sprintf('md5sum "%s"|cut -f1 -d" "',fn);
-    [is_ok,md5]=run_unix(cmd);
+    cmd=sprintf('md5sum "%s"',fn);
+    [is_ok,md5_with_fn]=run_unix(cmd);
+    parts=regexp(md5_with_fn,'\s+','split');
+    md5=parts{1};
 
 
 function [is_ok,md5]=md5_shell(fn)
