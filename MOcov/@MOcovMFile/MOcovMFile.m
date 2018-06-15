@@ -47,51 +47,9 @@ function props=get_mfile_props(fn)
     for k=1:n
         line=lines{k};
 
-        line_without_quotes=regexprep(line,'''.*''','');
-
-        comment_start=find(line_without_quotes=='%',1);
-        if isempty(comment_start)
-            line_code=line_without_quotes;
-        else
-            line_code=line_without_quotes(1:(comment_start-1));
-        end
-
-
-        line_code_trimmed=regexprep(line_code,'\s','');
-        if isempty(line_code_trimmed)
-            continue;
-        end
-
-        % Check for statements that ~changes/depends on~ the 'parser' state
-        classdef_statement = line_is_class_def(line_code_trimmed);
-        inside_class = inside_class || classdef_statement;
-
-        properties_section = line_opens_properties_section(...
-            line_code_trimmed, inside_class);
-        % When a properties section is opened set the inside_properties flag
-        inside_properties = inside_properties || properties_section;
-        % When inside_properties is set and an 'end' appears, the section
-        % is closed.
-        % This can be considered a hack, since assumes no code that includes
-        % an `end` is allowed inside properties.
-        inside_properties = inside_properties && ...
-            ~line_ends_with_end_statement(line_code_trimmed);
-
-        % classify line
-        executable(k)=~(...
-            in_line_continuation || ...
-            line_is_function_def(line_code_trimmed) || ...
-            classdef_statement || ...
-            line_opens_methods_section(line_code_trimmed, inside_class) || ...
-            inside_properties || ...  % Arbitrary code cannot run inside
-            ...                       % properties section, just a subset
-            line_is_case_statement(line_code) || ...
-            line_is_elseif_statement(line_code) || ...
-            line_is_else_statement(line_code) || ...
-            line_is_sole_end_statement(line_code_trimmed));
-
-        in_line_continuation=numel(line_code_trimmed)>=3 && ...
-                               strcmp(line_code_trimmed(end+(-2:0)),'...');
+        %% only pick lines that end with ';' after stripping comments
+        line = regexprep(line, "[[:space:]]*(?:[#%].*)?$", "");
+        executable(k) = (length(line) > 0 && line(end) == ';');
     end
 
     % put results in struct

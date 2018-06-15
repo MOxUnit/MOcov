@@ -29,12 +29,13 @@ function write_lines_with_prefix(obj, fn, decorator)
         line=orig_lines{k};
 
         if executable(k)
-            prefix=decorator(k);
+            suffix=decorator(k);
+            line = regexprep(line, "[[:space:]]*(?:[#%].*)?$", "");
         else
-            prefix='';
+            suffix='';
         end
 
-        new_lines{k}=sprintf('%s%s\n',prefix,line);
+        new_lines{k}=sprintf('%s%s\n',line,suffix);
     end
 
     pth=fileparts(fn);
