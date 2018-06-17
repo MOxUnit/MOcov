@@ -89,6 +89,7 @@ function varargout=mocov(varargin)
                                                     opt.method,...
                                                     monitor,...
                                                     opt.excludes);
+    mfile_collection.orig_pwd = orig_pwd;
     mfile_collection=prepare(mfile_collection);
     cleaner_collection=onCleanup(@()cleanup(mfile_collection));
 
@@ -157,7 +158,7 @@ function opt=parse_inputs(varargin)
     % process input options
 
     defaults=struct();
-    defaults.coverage_dir=pwd();
+    defaults.cover={};
     defaults.excludes={};
     defaults.html_dir=[];
     defaults.cobertura_xml=[];
@@ -191,7 +192,7 @@ function opt=parse_inputs(varargin)
 
                 case '-cover'
                     k=k+1;
-                    opt.cover=varargin{k};
+                    opt.cover(end+1)=varargin(k);
 
                 case '-cover_exclude'
                     k=k+1;
@@ -234,8 +235,11 @@ function opt=parse_inputs(varargin)
 
 
 function check_inputs(opt)
-    if ~isdir(opt.coverage_dir)
-        error('input dir ''%s'' does not exist', opt.coverage_dir);
+    for idx = 1 : length(opt.cover)
+        coverage_dir = opt.cover{idx};
+        if ~isdir(coverage_dir)
+            error('input dir ''%s'' does not exist', coverage_dir);
+        end
     end
 
     if isempty(opt.expression)

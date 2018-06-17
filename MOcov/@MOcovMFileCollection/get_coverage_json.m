@@ -18,8 +18,14 @@ function json=get_coverage_json(obj)
 %   - this output can be used by the coveralls.io online coverage service
 %     in combination with travis-ci
 
-    abs_root_dir=mocov_get_absolute_path(obj.root_dir);
-    git_root_dir=mocov_util_get_root_path_containing('.git',abs_root_dir);
+    for root_dir_idx = 1 : numel(obj.root_dirs)
+        root_dir = obj.root_dirs{root_dir_idx};
+        abs_root_dir=mocov_get_absolute_path(root_dir);
+        git_root_dir=mocov_util_get_root_path_containing('.git',abs_root_dir);
+        if ~isempty(git_root_dir)
+            break;
+        end
+    end
 
     service=get_service_params();
     source_files_json_cell=cellfun(@(mfile)get_coverage_json(mfile,...

@@ -25,7 +25,7 @@ function [mfile,idx]=get_mfile_numeric(obj,idx)
     mfile=obj.mfiles{idx};
 
 function [mfile,idx]=get_mfile_by_name(obj,fn)
-    root_dir=obj.root_dir;
+    root_dir=obj.orig_pwd;
     abs_fn=mocov_get_absolute_path(fullfile(root_dir,fn));
 
     mfiles=obj.mfiles;

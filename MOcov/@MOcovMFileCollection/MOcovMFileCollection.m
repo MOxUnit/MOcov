@@ -1,10 +1,10 @@
-function obj=MOcovMFileCollection(root_dir, method, monitor, exclude_pat)
+function obj=MOcovMFileCollection(root_dirs, method, monitor, exclude_pat)
 % instantiate MOcovMFileCollection
 %
 % obj=MOcovMFileCollection(root_dir, method, monitor)
 %
 % Inputs:
-%   root_dir                root directory containing m-files to be
+%   root_dirs               root directories containing m-files to be
 %                           covered.
 %   method                  Coverage method, one of:
 %                           - 'file'    rewrite m-files after adding
@@ -30,7 +30,7 @@ function obj=MOcovMFileCollection(root_dir, method, monitor, exclude_pat)
     end
 
     props=struct();
-    props.root_dir=root_dir;
+    props.root_dirs=root_dirs;
     props.monitor=monitor;
     props.exclude_pat=exclude_pat;
     props.mfiles=[];

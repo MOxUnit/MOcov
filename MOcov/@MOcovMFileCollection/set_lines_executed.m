@@ -2,8 +2,11 @@ function obj=set_lines_executed(obj)
     monitor=obj.monitor;
 
     if strcmp(obj.method,'profile')
-        abs_root_dir=mocov_get_absolute_path(obj.root_dir);
-        set_mocov_line_covered_from_profile(abs_root_dir);
+        for root_dir_idx = 1 : numel(obj.root_dirs)
+            root_dir = obj.root_dirs{root_dir_idx};
+            abs_root_dir=mocov_get_absolute_path(root_dir);
+            set_mocov_line_covered_from_profile(abs_root_dir);
+        end
     end
 
     s=mocov_line_covered();

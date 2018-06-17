@@ -24,9 +24,9 @@ function write_xml_file(obj, output_fn)
                     overall_coverage,branch_rate);
 
     % set sources
-    root_dir=obj.root_dir;
+    root_dir=obj.orig_pwd;
     sources=sprintf('<sources><source>%s</source></sources>',...
-                        root_dir);
+                    strjoin(obj.root_dirs, '</source><source>'));
 
     % set package header
     package_header=sprintf(['<packages>\n'...

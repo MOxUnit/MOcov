@@ -1,10 +1,10 @@
-function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
+function res=mocov_find_files(root_dirs, file_pat, monitor, exclude_pat)
 % Finds files recursively in a directory
 %
-% res=mocov_find_files([root_dir[, file_pat]])
+% res=mocov_find_files([root_dirs[, file_pat]])
 %
 % Inputs:
-%   root_dir            Optional directory in which files are sought.
+%   root_dirs           Optional directories in which files are sought.
 %                       If not provided or empty, the current working
 %                       directory is used.
 %   file_pat            Optional wildcard pattern, e.g. '*.m' for all
@@ -17,17 +17,13 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
 %                       patterns will be omitted from the output.
 %
 % Output:
-%   res                 Kx1 cell with names of files in root_dir matching
+%   res                 Kx1 cell with names of files in root_dirs matching
 %                       the pattern.
 %
 % NNO May 2015
 
     if nargin<1
-        root_dir='';
-    end
-
-    if ~(isempty(root_dir) || isdir(root_dir))
-        error('first argument must be directory');
+        root_dirs={'.'};
     end
 
     if nargin<2
@@ -50,11 +46,18 @@ function res=mocov_find_files(root_dir, file_pat, monitor, exclude_pat)
     exclude_re=get_exclude_re(exclude_pat);
 
     if ~isempty(monitor)
-        msg=sprintf('Finding files matching %s from %s',file_pat,root_dir);
+        msg=sprintf('Finding files matching %s from %s',file_pat, strjoin(root_dirs, '; '));
         notify(monitor, msg);
     end
 
-    res=find_files_recursively(root_dir,file_re,monitor,exclude_re);
+    res = {};
+    for root_dir_idx = 1 : numel(root_dirs)
+      root_dir = root_dirs{root_dir_idx};
+      res1 = find_files_recursively(root_dir,file_re,monitor,exclude_re);
+      if ~isempty(res1)
+        res = [res; res1];
+      end
+    end
 
 
 function re=pattern2re(pat)

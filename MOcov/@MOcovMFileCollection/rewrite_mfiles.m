@@ -21,15 +21,15 @@ function obj=rewrite_mfiles(obj, temp_dir)
         error('No mfiles - did you call ''prepare''?');
     end
 
-    root_dir=obj.root_dir;
-
+    orig_pwd = obj.orig_pwd;
+    
     n=numel(mfiles);
     for k=1:n
         mfile=mfiles{k};
 
         fn=get_filename(mfile);
 
-        rel_fn=mocov_get_relative_path(root_dir, fn);
+        rel_fn=mocov_get_relative_path(orig_pwd, fn);
         tmp_fn=fullfile(temp_dir, rel_fn);
 
         pat=sprintf('mocov_line_covered(%d,''%s'',%%d,1);',k,rel_fn);
