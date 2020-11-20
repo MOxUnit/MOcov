@@ -1,5 +1,5 @@
 function write_html(obj, output_dir)
-    if ~isdir(output_dir)
+    if ~mocov_util_isfolder(output_dir)
         mkdir(output_dir);
     end
 

@@ -11,7 +11,7 @@ function write_html_dir(obj, output_dir)
 %   - this function writes a file index.html, as well as node*.html files
 %     for each individual MOcovMFile.
 
-    if ~isdir(output_dir)
+    if ~mocov_util_isfolder(output_dir)
         mkdir(output_dir);
     end
 
