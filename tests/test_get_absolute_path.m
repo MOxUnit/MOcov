@@ -6,8 +6,20 @@ function test_suite = test_get_absolute_path
     initTestSuite;
 
 function test_get_absolute_path_basics()
-    aeq=@(a,b)assertEqual(mocov_get_absolute_path(a),b);
+    % Modify test to support windows
+    if ispc()
+        fs = filesep();
+        sps = @(str)strrep(str,'/',fs);
+  
+        % Prepend tests with 'c:' and flip to windows filesep
+        aeq=@(a,b)assertEqual(mocov_get_absolute_path(...
+            ['c:',sps(a)]),...
+            ['c:',sps(b)]);
+    else
+        aeq = @(a,b)assertEqual(mocov_get_absolute_path(a),b);
+    end
 
+    % Absolute path checks starting at a drive root
     aeq('/','/');
     aeq('/foo/../','/');
     aeq('/foo/..//','/');
@@ -15,10 +27,10 @@ function test_get_absolute_path_basics()
     aeq('/foo/../.','/');
     aeq('/foo/.././','/');
 
-
+    % Present working directory
     orig_pwd=pwd();
     cleaner=onCleanup(@()cd(orig_pwd));
     p=fileparts(mfilename('fullpath'));
     cd(p);
-    aeq('',p);
+    assertEqual(mocov_get_absolute_path(''),p)
 
