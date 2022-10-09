@@ -1,4 +1,5 @@
-# MOcov [![Build Status](https://travis-ci.org/MOcov/MOcov.svg?branch=master)](https://travis-ci.org/MOcov/MOcov) (sloppy hotfixed version by to support function definitions spanning multiple lines)
+# MOcov [![Build Status](https://travis-ci.org/MOcov/MOcov.svg?branch=master)](https://travis-ci.org/MOcov/MOcov) 
+### (hotfixed version to support function definitions spanning multiple lines)
 
 MOcov is a coverage report generator for Matlab and GNU Octave.
 
