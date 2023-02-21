@@ -113,7 +113,7 @@ function varargout=mocov(varargin)
     coverage_writers=get_coverage_writers_collection();
     write_coverage_results(coverage_writers, mfile_collection, opt);
 
-function coverage_writers=get_coverage_writers_collection
+function coverage_writers=get_coverage_writers_collection()
     coverage_writers=struct();
     coverage_writers.cover_html_dir=@write_html_dir;
     coverage_writers.cover_xml_file=@write_xml_file;
