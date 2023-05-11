@@ -108,7 +108,7 @@ function tf=line_is_function_def(line)
                  '(?<name>[a-zA-Z]\w*)(\([^\)]*\))?'];
 
     tf=~isempty(regexp([newline line],pat,'once'));
-    % addition, so that defs that span multiple lines with ... get 
+    % addition, so that defs that span multiple lines with ... get
     % recognized properly
     tf = tf || ~isempty(regexp(line,'function\s*\[.*\].*\.\.\.','once'));
 
@@ -146,5 +146,5 @@ function tf=line_ends_with_end_statement(line)
 function tf=line_has_line_continuation(line)
     % returns true if the line contains a line continuation
     tf=~isempty(regexp(line,'\.\.\.','once'));
-   
+
 
