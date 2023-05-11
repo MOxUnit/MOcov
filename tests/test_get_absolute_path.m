@@ -10,7 +10,7 @@ function test_get_absolute_path_basics()
     if ispc()
         fs = filesep();
         sps = @(str)strrep(str,'/',fs);
-  
+
         % Prepend tests with 'c:' and flip to windows filesep
         aeq=@(a,b)assertEqual(mocov_get_absolute_path(...
             ['c:',sps(a)]),...

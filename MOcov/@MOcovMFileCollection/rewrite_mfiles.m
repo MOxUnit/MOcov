@@ -32,8 +32,13 @@ function obj=rewrite_mfiles(obj, temp_dir)
         rel_fn=mocov_get_relative_path(root_dir, fn);
         tmp_fn=fullfile(temp_dir, rel_fn);
 
-        pat=sprintf('mocov_line_covered(%d,''%s'',%%d,1);',k,rel_fn);
-        decorator=@(line_number) sprintf(pat,line_number);
+        % on Windows the path may contain backslashes, which sprintf
+        % interprets as escape characters. Therefore we construct the
+        % decorator using string concatenation.
+        prefix=sprintf('mocov_line_covered(%d,''%s'',',k,rel_fn);
+        suffix=',1);';
+        decorator=@(line_number) [prefix sprintf('%d',line_number) suffix];
+
         write_lines_with_prefix(mfile, tmp_fn, decorator);
         notify(obj.monitor,'.',sprintf('Rewrote %s', rel_fn));
     end

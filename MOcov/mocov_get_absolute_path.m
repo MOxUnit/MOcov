@@ -19,7 +19,7 @@ function abs_fn=mocov_get_absolute_path(fn)
     abs_fn=clean_path_string(abs_fn);
 
 function clean_abs_fn=clean_path_string(abs_fn)
-    
+
     fs=filesep();
     re=regexptranslate('escape',fs);
 
@@ -58,10 +58,10 @@ function clean_abs_fn=clean_path_string(abs_fn)
 
         % deal with filesep at the end of the path
         while numel(clean_abs_fn)>1 && clean_abs_fn(end)==fs
-            if ispc() && numel(clean_abs_fn)==3 && clean_abs_fn(end-1)==':' 
+            if ispc() && numel(clean_abs_fn)==3 && clean_abs_fn(end-1)==':'
                 % Do not strip the slash on windows drive letters ( e.g c:\ )
                 break
-            else    
+            else
                 clean_abs_fn=clean_abs_fn(1:(end-1));
             end
         end
