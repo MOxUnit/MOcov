@@ -47,7 +47,7 @@ function props=get_mfile_props(fn)
     for k=1:n
         line=lines{k};
 
-        line_without_quotes=regexprep(line,'''.*''','');
+        line_without_quotes=regexprep(line,'''.*''|".*"','');
 
         comment_start=find(line_without_quotes=='%',1);
         if isempty(comment_start)
