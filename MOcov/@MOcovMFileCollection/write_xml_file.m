@@ -17,11 +17,11 @@ function write_xml_file(obj, output_fn)
     notify(monitor,sprintf('Writing xml files in %s', output_fn));
 
     % write header
-    overall_coverage=compute_coverage(obj);
+    [overall_coverage,lines_covered,lines_valid]=compute_coverage(obj);
     notify(monitor,sprintf('Overall coverage is %.3f', overall_coverage));
     header=sprintf(['<?xml version="1.0"?>\n'...
-                    '<coverage line-rate="%.3f" branch-rate="%.3f">'],...
-                    overall_coverage,branch_rate);
+                    '<coverage line-rate="%.3f" branch-rate="%.3f" lines-covered="%d" lines-valid="%d" branches-covered="0" branches-valid="0" complexity="0">'],...
+                    overall_coverage,branch_rate,lines_covered,lines_valid);
 
     % set sources
     root_dir=obj.root_dir;
@@ -68,7 +68,7 @@ function write_to_file(fn,s)
     cleaner=onCleanup(@()fclose(fid));
     fprintf(fid,'%s',s);
 
-function coverage=compute_coverage(obj)
+function [coverage,lines_covered,lines_valid]=compute_coverage(obj)
 % compute overall coverage across all files
     numerator=0;
     denominator=0;
@@ -88,5 +88,8 @@ function coverage=compute_coverage(obj)
     else
         coverage=numerator/denominator;
     end
+
+    lines_covered = numerator;
+    lines_valid = denominator;
 
 
