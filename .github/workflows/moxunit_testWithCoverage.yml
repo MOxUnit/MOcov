@@ -3,7 +3,7 @@ name: moxunit_testCoverage
 on: [push, pull_request]
 
 jobs:
-  coverage_test:
+  get_abs_path_test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,4 +19,12 @@ jobs:
       #     verbose: true
       #     fail_ci_if_error: true
       #     use_oidc: false
-        
+  recog_class_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: joergbrech/moxunit-action@v1.3.0
+        with:
+          src: .
+          tests: ./tests/test_MOcovMFile_recognizes_classdef_syntax.m
+          with_coverage: false        

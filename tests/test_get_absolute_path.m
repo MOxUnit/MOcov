@@ -3,8 +3,7 @@ function test_suite = test_get_absolute_path
             test_functions=localfunctions();
         catch % no problem; early Matlab versions can use initTestSuite fine
     end
-    initTestSuite;
-      
+    initTestSuite;      
 function test_get_absolute_path_basics()
     % Modify test to support windows
     if ispc()
