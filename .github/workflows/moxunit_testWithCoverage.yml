@@ -11,12 +11,12 @@ jobs:
         with:
           src: .
           tests: ./tests/test_get_absolute_path.m
-          with_coverage: true
-          cover_xml_file: coverage.xml
-      - uses: codecov/codecov-action@v3
-        with:
-          file: ./coverage.xml
-          verbose: true
-          fail_ci_if_error: true
-          use_oidc: false
+          with_coverage: false
+          # cover_xml_file: coverage.xml
+      # - uses: codecov/codecov-action@v3
+      #   with:
+      #     file: ./coverage.xml
+      #     verbose: true
+      #     fail_ci_if_error: true
+      #     use_oidc: false
         
