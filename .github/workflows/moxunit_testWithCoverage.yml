@@ -28,3 +28,14 @@ jobs:
           src: .
           tests: ./tests/test_MOcovMFile_recognizes_classdef_syntax.m
           with_coverage: false        
+  line_covered_test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: joergbrech/moxunit-action@v1.3.0
+        with:
+          src: .
+          tests: ./tests/test_mocov_line_covered.m
+          with_coverage: false        
+
+          
