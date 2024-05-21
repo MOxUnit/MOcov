@@ -10,7 +10,7 @@ jobs:
       - uses: joergbrech/moxunit-action@v1.3.0
         with:
           src: .
-          tests: ./test/test_get_absolute_path.m
+          tests: ./test/test_mocov_line_covered.m
           with_coverage: true
           cover_xml_file: coverage.xml
       - uses: codecov/codecov-action@v3
@@ -18,4 +18,5 @@ jobs:
           file: ./coverage.xml
           verbose: true
           fail_ci_if_error: true
+          use_oidc: false
         
