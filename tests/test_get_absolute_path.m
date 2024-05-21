@@ -6,7 +6,7 @@ function test_suite = test_get_absolute_path
     initTestSuite;
 
     function test_1
-        
+disp('hello')        
         assertEqual(1,1);
       
 # function test_get_absolute_path_basics()
