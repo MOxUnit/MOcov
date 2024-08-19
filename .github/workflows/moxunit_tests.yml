@@ -1,45 +1,14 @@
-name: moxunit_testCoverage
+name: tests_ubuntu_Octave
 
 on: [push, pull_request]
 
 jobs:
-  get_abs_path_test:
+  run_tests:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: joergbrech/moxunit-action@v1.3.0
         with:
-          src: .
-          tests: ./tests/test_get_absolute_path.m
+          src: . tests/regression/src/sub
+          tests: ./tests
           with_coverage: false
-          # cover_xml_file: coverage.xml
-      # - uses: codecov/codecov-action@v3
-      #   with:
-      #     file: ./coverage.xml
-      #     verbose: true
-      #     fail_ci_if_error: true
-      #     use_oidc: false
-      #   env:
-      #     CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-  recog_class_test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: joergbrech/moxunit-action@v1.3.0
-        with:
-          src: .
-          tests: ./tests/test_MOcovMFile_recognizes_classdef_syntax.m
-          # with_coverage: false        
-          #with_coverage: true
-          #cover_xml_file: coverage.xml
-  line_covered_test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: joergbrech/moxunit-action@v1.3.0
-        with:
-          src: .
-          tests: ./tests/test_mocov_line_covered.m
-          # with_coverage: false        
-          #with_coverage: true
-          #cover_xml_file: coverage.xml
