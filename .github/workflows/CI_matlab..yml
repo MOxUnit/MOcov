@@ -1,0 +1,42 @@
+---
+name: CI matlab windows
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: ['*']
+
+jobs:
+  matlab_tests:
+
+    strategy:
+      matrix:
+        matlab_version: [R2023a]
+        os: [windows-latest]
+      fail-fast: false 
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+
+    # use matlab-actions/setup-matlab to setup a specific version of MATLAB
+    # https://github.com/matlab-actions/setup-matlab
+    - name: Install MATLAB
+      uses: matlab-actions/setup-matlab@v1.2.4
+      with:
+        release: ${{ matrix.matlab_version }}
+
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Install Moxunit
+      run: |
+        git clone https://github.com/MOxUnit/MOxUnit.git --depth 1
+
+    # use matlab-actions/setup-matlab to run a matlab command
+    # https://github.com/matlab-actions/setup-matlab
+    - name: Run tests on dummy source code to test MoCov
+      uses: matlab-actions/run-command@v1.1.3
+      with:
+        command: "cd('./MOxUnit/MOxUnit/'); moxunit_set_path(); cd ../..; addpath(fullfile(pwd, 'MOcov')); moxunit_runtests extra_tests/tests -verbose -recursive -with_coverage -cover extra_tests/src -cover_xml_file coverage.xml; exit(double(~ans))"
