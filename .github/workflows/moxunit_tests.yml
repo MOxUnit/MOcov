@@ -30,8 +30,8 @@ jobs:
           src: .
           tests: ./tests/test_MOcovMFile_recognizes_classdef_syntax.m
           # with_coverage: false        
-          with_coverage: true
-          cover_xml_file: coverage.xml
+          #with_coverage: true
+          #cover_xml_file: coverage.xml
   line_covered_test:
     runs-on: ubuntu-latest
     steps:
@@ -41,5 +41,5 @@ jobs:
           src: .
           tests: ./tests/test_mocov_line_covered.m
           # with_coverage: false        
-          with_coverage: true
-          cover_xml_file: coverage.xml
+          #with_coverage: true
+          #cover_xml_file: coverage.xml
