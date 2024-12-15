@@ -19,4 +19,3 @@ function s=get_notify_str(obj,varargin)
     end
 
     s=sprintf(pat, msg);
-

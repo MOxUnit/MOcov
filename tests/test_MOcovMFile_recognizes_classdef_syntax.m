@@ -160,4 +160,3 @@ function test_generate_valid_file
                        '%s - please check for syntax errors.'], tempfile);
     end
 end
-

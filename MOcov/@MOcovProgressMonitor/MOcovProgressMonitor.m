@@ -22,4 +22,3 @@ function obj=MOcovProgressMonitor(verbosity)
     props.char_counter=0;
     props.max_chars=60;
     obj=class(props,'MOcovProgressMonitor');
-

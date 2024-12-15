@@ -85,4 +85,3 @@ function [is_ok,md5]=md5_shell(fn)
 
     cmd=sprintf('md5 -q "%s"',fn);
     [is_ok,md5]=run_unix(cmd);
-
