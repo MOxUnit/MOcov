@@ -77,7 +77,14 @@ function varargout=mocov(varargin)
 
     % store original state of mocov_line_covered, and ensure it is reset
     % afterwards
-    line_covered_state=mocov_line_covered();
+    line_covered_state=mocov_line_covered()
+
+    ##
+    line_covered_state=oct_line_covered()
+    ##
+
+    stop
+
     cleaner_covered=onCleanup(@()mocov_line_covered(...
                                             line_covered_state));
 
