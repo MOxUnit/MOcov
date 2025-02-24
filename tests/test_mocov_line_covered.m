@@ -60,7 +60,3 @@ function test_mocov_line_covered_basics()
 
 function assert_cell_equal_or_empty(xs,ys)
     assertEqual(sort(xs),sort(ys));
-
-
-
-

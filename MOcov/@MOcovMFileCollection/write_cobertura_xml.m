@@ -71,5 +71,3 @@ function coverage=compute_coverage(obj)
     else
         coverage=numerator/denominator;
     end
-
-

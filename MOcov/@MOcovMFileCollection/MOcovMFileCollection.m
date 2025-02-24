@@ -38,4 +38,3 @@ function obj=MOcovMFileCollection(root_dir, method, monitor, exclude_pat)
     props.temp_dir=[];
     props.method=method;
     obj=class(props,'MOcovMFileCollection');
-

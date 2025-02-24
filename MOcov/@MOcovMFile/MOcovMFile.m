@@ -146,5 +146,3 @@ function tf=line_ends_with_end_statement(line)
 function tf=line_has_line_continuation(line)
     % returns true if the line contains a line continuation
     tf=~isempty(regexp(line,'\.\.\.','once'));
-
-

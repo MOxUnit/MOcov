@@ -94,5 +94,3 @@ function [coverage,lines_covered,lines_valid]=compute_coverage(obj)
 
     lines_covered = numerator;
     lines_valid = denominator;
-
-

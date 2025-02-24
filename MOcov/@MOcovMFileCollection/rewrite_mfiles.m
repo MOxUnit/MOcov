@@ -42,4 +42,3 @@ function obj=rewrite_mfiles(obj, temp_dir)
         write_lines_with_prefix(mfile, tmp_fn, decorator);
         notify(obj.monitor,'.',sprintf('Rewrote %s', rel_fn));
     end
-

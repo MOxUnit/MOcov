@@ -72,4 +72,3 @@ function clean_abs_fn=clean_path_string(abs_fn)
 
         abs_fn=clean_abs_fn;
     end
-

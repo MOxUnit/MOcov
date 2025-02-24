@@ -16,6 +16,3 @@ function v=mocov_util_platform_version()
 
     num_parts=regexp(first_part,'\.','split');
     v=cellfun(@str2num,num_parts);
-
-
-

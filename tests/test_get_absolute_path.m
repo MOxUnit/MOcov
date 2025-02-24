@@ -33,4 +33,3 @@ function test_get_absolute_path_basics()
     p=fileparts(mfilename('fullpath'));
     cd(p);
     assertEqual(mocov_get_absolute_path(''),p)
-
