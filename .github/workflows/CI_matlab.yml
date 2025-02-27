@@ -39,5 +39,5 @@ jobs:
         -   name: Run tests on dummy source code to test MoCov
             uses: matlab-actions/run-command@v2
             with:
-                command: cd('./MOxUnit/MOxUnit/'); moxunit_set_path(); cd ../..; addpath(fullfile(pwd, 'MOcov')); moxunit_runtests tests -verbose -recursive;
-                    exit(double(~ans))
+                command: cd('./MOxUnit/MOxUnit/'); moxunit_set_path(); cd ../..; addpath(fullfile(pwd, 'MOcov')); moxunit_runtests tests -verbose -recursive
+                    -with_coverage -cover tests/regression/src; exit(double(~ans));
