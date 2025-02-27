@@ -1,5 +1,5 @@
 ---
-name: regression_test_windows_Matlab
+name: CI matlab
 
 on:
     push:
