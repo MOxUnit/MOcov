@@ -49,4 +49,4 @@ jobs:
                 flags: ${{ matrix.os }}_matlab-${{ matrix.matlab_version }}
                 name: codecov-matlab
                 fail_ci_if_error: false
-                token: ${{ secrets.CODECOV_TOKEN }}                    
+                token: ${{ secrets.CODECOV_TOKEN }}
