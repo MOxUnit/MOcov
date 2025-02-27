@@ -47,6 +47,5 @@ jobs:
             run: octave --version
 
         -   name: Run tests
-            run: |
-                octave $OCTFLAGS --eval "moxunit_runtests tests -verbose; exit(double(~ans))"
-                octave $OCTFLAGS --eval "moxunit_runtests tests/regression/tests -verbose; exit(double(~ans))"
+            run: octave $OCTFLAGS --eval "moxunit_runtests tests -verbose -recursive -with_coverage -cover tests/regression/src -cover_xml_file coverage.xml;
+                exit(double(~ans));"
