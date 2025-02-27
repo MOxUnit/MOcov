@@ -40,4 +40,4 @@ jobs:
             uses: matlab-actions/run-command@v2
             with:
                 command: cd('./MOxUnit/MOxUnit/'); moxunit_set_path(); cd ../..; addpath(fullfile(pwd, 'MOcov')); moxunit_runtests tests -verbose -recursive
-                    -with_coverage -cover tests/regression/src; exit(double(~ans));
+                    -with_coverage -cover tests/regression/src -cover_xml_file coverage.xml; exit(double(~ans));
