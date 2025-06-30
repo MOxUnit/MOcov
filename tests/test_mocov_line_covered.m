@@ -13,8 +13,8 @@ function test_mocov_line_covered_basics()
 
     s = struct();
     s.keys = {'a'; 'c'};
-    s.line_count = {[0;1;3;2;0]; ...
-                    [0;10]};
+    s.line_count = {[0; 1; 3; 2; 0]; ...
+                    [0; 10]};
 
     % set the state and query it
     mocov_line_covered(s);
@@ -30,9 +30,9 @@ function test_mocov_line_covered_basics()
 
     s = struct();
     s.keys = {'a'; 'b'; 'c'};
-    s.line_count = {[0;1;3;4;1]; ...
-                    [0;0;1]; ...
-                    [0;10;0;1]};
+    s.line_count = {[0; 1; 3; 4; 1]; ...
+                    [0; 0; 1]; ...
+                    [0; 10; 0; 1]};
     s2 = mocov_line_covered();
     first_empty_pos = find(cellfun(@isempty, s2.keys), 1);
     if ~isempty(first_empty_pos)
