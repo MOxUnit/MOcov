@@ -448,8 +448,8 @@ void return_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
 
         // Return a row vector for each file (when debugging it's more
         // readable).
-        size_t n_columns = has_line_count ? cf->n_lines : 0;
-        size_t n_rows = 1;
+        size_t n_rows = has_line_count ? cf->n_lines : 0;
+        size_t n_columns = 1;
         size_t n_items = n_columns * n_rows;
 
         mxArray *mx_line_count =
