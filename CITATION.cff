@@ -1,0 +1,25 @@
+# schema: https://github.com/citation-file-format/citation-file-format/blob/main/schema-guide.md
+
+cff-version: 1.2.0
+
+title: MOcov
+
+abstract: MOcov is a coverage report generator for Matlab and GNU-Octave.
+
+version: 0.1.0
+
+license: MIT
+
+repository-code: https://github.com/MOxUnit/MOcov.git
+
+message: If you use this software, please cite it as below.
+
+keywords:
+  - testing-framework
+  - MATLAB
+  - octave
+
+authors:
+  - given-names: Nikolaas N.
+    family-names: Oosterhof
+    email: n.oosterhof@gmail.com
