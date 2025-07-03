@@ -399,12 +399,13 @@ void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
     if (set_filename) {
         // First call for filename with this index, store filename
         cf->filename = fn;
-    } else if (check_filename && strcmp(cf->filename, fn) != 0) {
-        // Subsequent call for file with this index, make sure that the filename
-        // is the same as on the first call.
+    } else {
+        bool raise_error = check_filename && strcmp(cf->filename, fn) != 0;
         free(fn);
-        raise_mex_error("FileNameMismatch",
-                        "File name mismatch, this should not happen");
+        if (raise_error) {
+            raise_mex_error("FileNameMismatch",
+                            "File name mismatch, this should not happen");
+        }
     }
 
     debug("done adding line covered with filename set=%i / check=%i",
