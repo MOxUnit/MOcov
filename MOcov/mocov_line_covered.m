@@ -29,6 +29,8 @@ function state = mocov_line_covered(varargin)
     persistent cached_keys
     persistent cached_line_count
 
+    strictly_check_filename = false;
+
     % initialize persistent variables, if necessary
     if isnumeric(cached_keys)
         cached_keys = cell(0);
@@ -56,12 +58,12 @@ function state = mocov_line_covered(varargin)
             cached_line_count = state.line_count;
             return
 
-        case 4
+        case 3
             % add a line covered
             index = varargin{1};
             key = varargin{2};
             line = varargin{3};
-            count = varargin{4};
+            count = 1;
 
             state = [];
 
@@ -78,7 +80,7 @@ function state = mocov_line_covered(varargin)
     if cached_keys_too_small || isempty(cached_keys{index})
         cached_keys{index} = key;
         cached_line_count{index} = zeros(10, 1);
-    elseif ~isequal(cached_keys{index}, key)
+    elseif strictly_check_filename && ~isequal(cached_keys{index}, key)
         error('Key mismatch, %s ~= %s', cached_keys{index}, key);
     end
 

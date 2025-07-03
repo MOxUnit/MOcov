@@ -26,6 +26,7 @@
 
 // Define the IS_DEBUG variable
 #define IS_DEBUG 0 // 0 -> no debugging messages; 1 -> print debugging messages
+#define HAS_STRICT_FILENAME_CHECK 0 // 0 -> no strict check (faster), 1 -> check
 
 typedef int line_count_t;
 
@@ -262,23 +263,6 @@ void free_covered_file(covered_file *file) {
     file->capacity = 0;
 }
 
-// Function to set the filename upon first use, or verify it is as expected
-void set_or_check_filename(covered_file *cf, const char *filename) {
-    raise_mex_error_if_null_pointer(cf, "covered file is null");
-
-    if (cf->filename == NULL) {
-        // First call for filename with this index, store filename
-        char *filename_copy = strdup(filename);
-        raise_mex_error_if_null_pointer(filename_copy, "filename strdup");
-        cf->filename = filename_copy;
-    } else if (strcmp(cf->filename, filename) != 0) {
-        // Subsequent call for file with this index, make sure that the filename
-        // is the same as on the first call.
-        raise_mex_error("FileNameMismatch",
-                        "File name mismatch, this should not happen");
-    }
-}
-
 // Function to extend the covered_files struct
 void extend_covered_files(covered_files *cfs, size_t new_capacity) {
     if (new_capacity <= cfs->capacity) {
@@ -314,30 +298,19 @@ void extend_to_fit_covered_files(covered_files *cfs, int index) {
     cfs->n_files = max(cfs->n_files, index + 1);
 }
 
-// Function to clean up memory used by covered_files
-void free_covered_files(covered_files *cfs) {
-    if (cfs == NULL) {
-        return;
-    }
-    if (cfs->files != NULL) {
-        for (int i = 0; i < cfs->n_files; i++) {
-            free_covered_file(&cfs->files[i]);
-        }
-        free(cfs->files);
-    }
-    free(cfs);
-}
-
-void init_covered_files(covered_files *cfs) {
-    cfs->n_files = 0;
-    cfs->capacity = 0;
-    cfs->files = NULL;
-}
-
 // Functions that operate on internal state
 void free_state() {
     debug("free state");
-    free_covered_files(state);
+    if (state == NULL) {
+        return;
+    }
+    if (state->files != NULL) {
+        for (int i = 0; i < state->n_files; i++) {
+            free_covered_file(&state->files[i]);
+        }
+        free(state->files);
+    }
+    free(state);
 }
 
 void init_state() {
@@ -349,7 +322,10 @@ void init_state() {
     if (state == NULL) {
         raise_mex_error_if_null_pointer(state, "init state");
     }
-    init_covered_files(state);
+
+    state->n_files = 0;
+    state->capacity = 0;
+    state->files = NULL;
 }
 
 // Convert double to int, raise error if not possible
@@ -391,19 +367,48 @@ void cleanup() { free_state(); }
 void register_cleanup() { mexAtExit(cleanup); }
 
 // Helper function to add a line state count
-void add_line_covered(int idx, const char *fn, int line_number,
-                      line_count_t count) {
-    debug("add line covered idx=%i, fn=%s, line_number (base 0)=%i, count=%i",
-          idx, fn, line_number, count);
+void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
+    debug("add line covered idx=%i, line_number (base 0)=%i", idx, line_number);
     debug_print_state();
 
     extend_to_fit_covered_files(state, idx);
     covered_file *cf = &state->files[idx];
-    set_or_check_filename(cf, fn);
     extend_to_fit_covered_file(cf, line_number);
-    cf->line_counts[line_number] += count;
+    cf->line_counts[line_number]++;
 
-    debug("done adding line covered");
+    // see if we need to set or check the filename
+    const bool set_filename = cf->filename == NULL;
+#if HAS_STRICT_FILENAME_CHECK
+    const bool check_filename = true;
+#else
+    const bool check_filename = false;
+#endif
+
+    if (!(set_filename || check_filename)) {
+        // no check needed, we are done
+        return;
+    }
+
+    if (!mxIsChar(fn_mx)) {
+        raise_mex_error("InvalidInput", "arg 2 of 3 must be a string");
+    }
+
+    char *fn = mxArrayToString(fn_mx);
+    raise_mex_error_if_null_pointer(fn, "fn in update_state");
+
+    if (set_filename) {
+        // First call for filename with this index, store filename
+        cf->filename = fn;
+    } else if (check_filename && strcmp(cf->filename, fn) != 0) {
+        // Subsequent call for file with this index, make sure that the filename
+        // is the same as on the first call.
+        free(fn);
+        raise_mex_error("FileNameMismatch",
+                        "File name mismatch, this should not happen");
+    }
+
+    debug("done adding line covered with filename set=%i / check=%i",
+          set_filename, check_filename);
     debug_print_state();
 }
 
@@ -595,26 +600,20 @@ void set_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
 // Helper function to handle nrhs == 4 case (update the state with a specific
 // line state)
 void update_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
+
     debug("updating state");
-    int idx = get_scalar_int_from_mx_double(prhs[0], "arg 1 of 4") -
+    int idx = get_scalar_int_from_mx_double(prhs[0], "arg 1 of 3") -
               1; // Convert to 0-base line number
 
-    if (!mxIsChar(prhs[1])) {
-        raise_mex_error("InvalidInput", "arg 2 of 4 must be a string");
-    }
-    char *fn = mxArrayToString(prhs[1]);
-    raise_mex_error_if_null_pointer(fn, "fn in update_state");
-
-    int line_number = get_scalar_int_from_mx_double(prhs[2], "arg 3 of 4") -
+    int line_number = get_scalar_int_from_mx_double(prhs[2], "arg 3 of 3") -
                       1; // Convert to 0-base line number
-    line_count_t count = get_scalar_int_from_mx_double(prhs[3], "arg 4 of 4");
 
     // call helper function
-    debug("call 4 args");
-    add_line_covered(idx, fn, line_number, count);
+    debug("call 3 args");
+    add_line_covered(idx, prhs[1], line_number);
 
     // free fn pointer after use
-    free(fn);
+    // free(fn);
     debug("updating state: done, state is now");
     debug_print_state();
 }
@@ -630,7 +629,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         init_state();
     }
 
-    if (nrhs == 4) {
+    if (nrhs == 3) {
         // Update the state for a specific line in a file.
         // Optimization: because `nrhs == 4` is the most frequently used
         // use of this function, this is checked first.
@@ -640,7 +639,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         set_state(prhs, nlhs, plhs);
     } else if (nrhs != 0) {
         mexErrMsgIdAndTxt("mocov_line_covered:TooManyInputs",
-                          "This function accepts zero, one, or four inputs.");
+                          "This function accepts zero, one, or thre inputs.");
         return; // make static checker happy
     }
 
