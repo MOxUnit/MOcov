@@ -406,7 +406,6 @@ void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
     if (needs_to_set_filename || cf->lines[line_number].filename_mx != fn_mx)
 #endif
     {
-
         char *fn = mxArrayToString(fn_mx);
         raise_mex_error_if_null_pointer(fn, "fn in update_state");
 
