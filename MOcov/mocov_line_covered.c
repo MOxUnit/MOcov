@@ -24,9 +24,16 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Define the IS_DEBUG variable
-#define IS_DEBUG 0 // 0 -> no debugging messages; 1 -> print debugging messages
-#define HAS_STRICT_FILENAME_CHECK 0 // 0 -> no strict check (faster), 1 -> check
+// 0 -> no debugging messages; 1 -> print (lots of) debugging messages
+#define IS_DEBUG 0
+
+// Octave represents a string literal through a pointer. By caching the
+// pointer, repeated string comparison calls can be avoided. This comes at the
+// of roughly doubling memory requirements.
+// Some basic benchmarking (Octave version 9.4.0, Mac silicon, 2025) suggests
+// that no cache may be slightly faster.
+// 0 -> no cache (more string comparisons), 1 -> cache (requires more memory)
+#define CACHE_FILENAME_POINTER 0
 
 typedef int line_count_t;
 
@@ -35,7 +42,9 @@ int max(int a, int b) { return (a > b) ? a : b; }
 
 typedef struct {
     line_count_t count;
+#if CACHE_FILENAME_POINTER
     const mxArray *filename_mx;
+#endif
 } covered_line;
 
 // Structure to store covered lines for a single .m file
@@ -240,11 +249,13 @@ void extend_covered_file(covered_file *file, size_t new_capacity) {
 
     for (size_t i = file->capacity; i < new_capacity; i++) {
         new_lines[i].count = 0;
+#if CACHE_FILENAME_POINTER
         new_lines[i].filename_mx = NULL;
+#endif
     }
     // Initialize newly added lines to 0
-    memset(new_lines + file->capacity, 0,
-           (new_capacity - file->capacity) * sizeof(covered_line));
+    // memset(new_lines + file->capacity, 0,
+    //       (new_capacity - file->capacity) * sizeof(covered_line));
 
     // Update the structure with the new size and line_counts
     file->lines = new_lines;
@@ -389,27 +400,37 @@ void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
     cf->lines[line_number].count++;
 
     // see if we need to set or check the filename
-
+    char *fn = NULL;
     if (cf->filename == NULL) {
-        char *fn = mxArrayToString(fn_mx);
+        fn = mxArrayToString(fn_mx);
         raise_mex_error_if_null_pointer(fn, "fn in update_state");
 
         // First call for filename with this index, store filename
         cf->filename = fn;
     }
 
+#if CACHE_FILENAME_POINTER
     if (cf->lines[line_number].filename_mx == NULL ||
         cf->lines[line_number].filename_mx != fn_mx) {
-        char *fn = mxArrayToString(fn_mx);
+#else
+    { // start unconditional block
+#endif
+        // only free fn later if it was not set in the code block above
+        const bool free_fn = (fn == NULL);
+        fn = mxArrayToString(fn_mx);
         raise_mex_error_if_null_pointer(fn, "fn in update_state");
-        bool raise_error = strcmp(cf->filename, fn) != 0;
-        free(fn);
+        const bool raise_error = strcmp(cf->filename, fn) != 0;
+        if (free_fn) {
+            free(fn);
+        }
         if (raise_error) {
             raise_mex_error("FileNameMismatch",
                             "File name mismatch, this should not happen");
         }
-        // update filname pointer
+#if CACHE_FILENAME_POINTER
+        // update filename pointer
         cf->lines[line_number].filename_mx = fn_mx;
+#endif
 
     } // else: cache hit, no need to check or update filename pointer
 
@@ -594,7 +615,9 @@ void set_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
         extend_covered_file(cf, n_lines);
         for (size_t j = 0; j < n_lines; j++) {
             cf->lines[j].count = (line_count_t)double_to_int(line_count[j]);
+#if CACHE_FILENAME_POINTER
             cf->lines[j].filename_mx = NULL;
+#endif
         }
         state->n_files = (i + 1);
     }
