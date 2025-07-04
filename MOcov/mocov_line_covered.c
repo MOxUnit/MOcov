@@ -672,7 +672,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         set_state(prhs, nlhs, plhs);
     } else if (nrhs != 0) {
         mexErrMsgIdAndTxt("mocov_line_covered:TooManyInputs",
-                          "This function accepts zero, one, or thre inputs.");
+                          "This function accepts zero, one, or three inputs.");
         return; // make static checker happy
     }
 
