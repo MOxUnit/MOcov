@@ -39,7 +39,7 @@ jobs:
         -   name: Install Octave
             run: |
                 sudo apt-get -y -qq update
-                sudo apt-get -y install octave
+                sudo apt-get -y install octave octave-dev
                 make -C MOxUnit install
                 make install
 
