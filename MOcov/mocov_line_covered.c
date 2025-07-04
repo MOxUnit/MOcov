@@ -33,12 +33,17 @@ typedef int line_count_t;
 // Define helper that computes the maximum of two values
 int max(int a, int b) { return (a > b) ? a : b; }
 
+typedef struct {
+    line_count_t count;
+    const mxArray *filename_mx;
+} covered_line;
+
 // Structure to store covered lines for a single .m file
 typedef struct {
-    char *filename;            // Dynamically allocated string for the filename
-    size_t capacity;           // Size of line_counts
-    size_t n_lines;            // Largest line number encountered so far
-    line_count_t *line_counts; // For each line how often it was executed
+    char *filename;      // Dynamically allocated string for the filename
+    size_t capacity;     // Size of line_counts
+    size_t n_lines;      // Largest line number encountered so far
+    covered_line *lines; // For each line how often it was executed
 } covered_file;
 
 // Structure to store covered lines for a list of .m files
@@ -140,12 +145,12 @@ void debug_print_state() {
                     i, filename, n_lines, cf->capacity);
 
                 // Print line counts for each file's covered_lines
-                if (cf->line_counts == NULL) {
-                    mexPrintf(".line_counts is NULL\n", i);
+                if (cf->lines == NULL) {
+                    mexPrintf(".lines is NULL\n");
                 } else {
-                    mexPrintf(".line_counts=[ ", i); // Print size first
+                    mexPrintf(".lines=[ "); // Print size first
                     for (size_t j = 0; j < n_lines; j++) {
-                        mexPrintf("%i ", cf->line_counts[j]);
+                        mexPrintf("%i ", cf->lines[j].count);
                     }
                     mexPrintf("]\n");
                 }
@@ -218,7 +223,7 @@ void init_covered_file(covered_file *file) {
     file->filename = NULL;
     file->n_lines = 0;
     file->capacity = 0;
-    file->line_counts = NULL;
+    file->lines = NULL;
 }
 
 // Function to extend the file_covered_lines struct
@@ -228,17 +233,21 @@ void extend_covered_file(covered_file *file, size_t new_capacity) {
     }
 
     // Reallocate memory for the line_counts array
-    line_count_t *new_line_counts =
-        realloc(file->line_counts, new_capacity * sizeof(line_count_t));
+    covered_line *new_lines =
+        realloc(file->lines, new_capacity * sizeof(covered_line));
     raise_mex_error_if_null_pointer(
-        new_line_counts, "Failed to resize line_counts in covered_file");
+        new_lines, "Failed to resize line_counts in covered_file");
 
-    // Initialize newly added line_counts to 0
-    memset(new_line_counts + file->capacity, 0,
-           (new_capacity - file->capacity) * sizeof(line_count_t));
+    for (size_t i = file->capacity; i < new_capacity; i++) {
+        new_lines[i].count = 0;
+        new_lines[i].filename_mx = NULL;
+    }
+    // Initialize newly added lines to 0
+    memset(new_lines + file->capacity, 0,
+           (new_capacity - file->capacity) * sizeof(covered_line));
 
     // Update the structure with the new size and line_counts
-    file->line_counts = new_line_counts;
+    file->lines = new_lines;
     file->capacity = new_capacity;
 }
 
@@ -256,9 +265,11 @@ void extend_to_fit_covered_file(covered_file *file, int index) {
 // Function to clean up memory used by file_covered_lines
 void free_covered_file(covered_file *file) {
     free(file->filename);
-    free(file->line_counts);
     file->filename = NULL;
-    file->line_counts = NULL;
+
+    free(file->lines);
+    file->lines = NULL;
+
     file->n_lines = 0;
     file->capacity = 0;
 }
@@ -368,48 +379,41 @@ void register_cleanup() { mexAtExit(cleanup); }
 
 // Helper function to add a line state count
 void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
+
     debug("add line covered idx=%i, line_number (base 0)=%i", idx, line_number);
     debug_print_state();
 
     extend_to_fit_covered_files(state, idx);
     covered_file *cf = &state->files[idx];
     extend_to_fit_covered_file(cf, line_number);
-    cf->line_counts[line_number]++;
+    cf->lines[line_number].count++;
 
     // see if we need to set or check the filename
-    const bool set_filename = cf->filename == NULL;
-#if HAS_STRICT_FILENAME_CHECK
-    const bool check_filename = true;
-#else
-    const bool check_filename = false;
-#endif
 
-    if (!(set_filename || check_filename)) {
-        // no check needed, we are done
-        return;
-    }
+    if (cf->filename == NULL) {
+        char *fn = mxArrayToString(fn_mx);
+        raise_mex_error_if_null_pointer(fn, "fn in update_state");
 
-    if (!mxIsChar(fn_mx)) {
-        raise_mex_error("InvalidInput", "arg 2 of 3 must be a string");
-    }
-
-    char *fn = mxArrayToString(fn_mx);
-    raise_mex_error_if_null_pointer(fn, "fn in update_state");
-
-    if (set_filename) {
         // First call for filename with this index, store filename
         cf->filename = fn;
-    } else {
-        bool raise_error = check_filename && strcmp(cf->filename, fn) != 0;
+    }
+
+    if (cf->lines[line_number].filename_mx == NULL ||
+        cf->lines[line_number].filename_mx != fn_mx) {
+        char *fn = mxArrayToString(fn_mx);
+        raise_mex_error_if_null_pointer(fn, "fn in update_state");
+        bool raise_error = strcmp(cf->filename, fn) != 0;
         free(fn);
         if (raise_error) {
             raise_mex_error("FileNameMismatch",
                             "File name mismatch, this should not happen");
         }
-    }
+        // update filname pointer
+        cf->lines[line_number].filename_mx = fn_mx;
 
-    debug("done adding line covered with filename set=%i / check=%i",
-          set_filename, check_filename);
+    } // else: cache hit, no need to check or update filename pointer
+
+    debug("done adding line covered");
     debug_print_state();
 }
 
@@ -450,7 +454,7 @@ void return_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
         debug("file %i: has_filename=%i, key=%s", i, has_filename, cached_key);
 
         // cached line counts
-        bool has_line_count = has_cf && cf->line_counts != NULL;
+        bool has_line_count = has_cf && cf->lines != NULL;
 
         // Return a row vector for each file (when debugging it's more
         // readable).
@@ -467,7 +471,7 @@ void return_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
 
         for (size_t j = 0; j < n_items; j++) {
             // copy line counts one-by-one
-            arr_line_count[j] = (mxDouble)cf->line_counts[j];
+            arr_line_count[j] = (mxDouble)cf->lines[j].count;
         }
 
         memcpy(mxGetData(mx_line_count), arr_line_count,
@@ -589,7 +593,8 @@ void set_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
         cf->n_lines = n_lines;
         extend_covered_file(cf, n_lines);
         for (size_t j = 0; j < n_lines; j++) {
-            cf->line_counts[j] = (line_count_t)double_to_int(line_count[j]);
+            cf->lines[j].count = (line_count_t)double_to_int(line_count[j]);
+            cf->lines[j].filename_mx = NULL;
         }
         state->n_files = (i + 1);
     }
@@ -605,6 +610,10 @@ void update_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
     debug("updating state");
     int idx = get_scalar_int_from_mx_double(prhs[0], "arg 1 of 3") -
               1; // Convert to 0-base line number
+
+    if (!mxIsChar(prhs[1])) {
+        raise_mex_error("InvalidInput", "arg 2 of 3 must be a string");
+    }
 
     int line_number = get_scalar_int_from_mx_double(prhs[2], "arg 3 of 3") -
                       1; // Convert to 0-base line number

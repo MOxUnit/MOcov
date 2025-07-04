@@ -5,21 +5,30 @@ function test_suite = test_mocov_line_covered
     end
     initTestSuite;
 
-function test_mocov_line_covered_basics()
-    initial_state = mocov_line_covered();
-    cleaner = onCleanup(@()mocov_line_covered(initial_state));
-    aet = @(varargin)assertExceptionThrown(@() ...
-                                           mocov_line_covered(varargin{:}));
-
+function s=get_base_state()
     s = struct();
     s.keys = {'a'; 'c'};
     s.line_count = {[0; 1; 3; 2; 0]; ...
                     [0; 10]};
 
+function test_mocov_line_covered_set_and_get()
+    initial_state = mocov_line_covered();
+    cleaner = onCleanup(@()mocov_line_covered(initial_state));
+
+    s = get_base_state();
+
     % set the state and query it
     mocov_line_covered(s);
-    s2 = mocov_line_covered(s);
-    assertEqual(s, s2);
+    s_actual = mocov_line_covered(s);
+    assert_state_equal(s, s_actual)
+
+function test_mocov_line_covered_updates()
+    initial_state = mocov_line_covered();
+    cleaner = onCleanup(@()mocov_line_covered(initial_state));
+
+    % set state
+    s = get_base_state();
+    mocov_line_covered(s);
 
     % set a couple of lines covered, and verify the state is updated
     mocov_line_covered(1, 'a', 4);
@@ -30,13 +39,35 @@ function test_mocov_line_covered_basics()
     mocov_line_covered(2, 'c', 104);
     mocov_line_covered(2, 'c', 104);
 
-    s = struct();
-    s.keys = {'a'; 'c'; 'b'};
-    s.line_count = {[0; 1; 3; 3; 1]; ...
-                    [0; 10; 0; 1]; ...
-                    [0; 0; 1; zeros(100,1 ); 2]};
-    t = mocov_line_covered();
-    assert_state_equal(s, t)
+    s_expected = struct();
+    s_expected.keys = {'a'; 'c'; 'b'};
+    s_expected.line_count = {[0; 1; 3; 3; 1]; ...
+                     [0; 10; 0; 1]; ...
+                     [0; 0; 1; zeros(100, 1); 2]};
+    s_actual = mocov_line_covered();
+    assert_state_equal(s_actual, s_expected)
+
+
+function test_mocov_line_covered_exceptions()
+    initial_state = mocov_line_covered();
+    cleaner = onCleanup(@()mocov_line_covered(initial_state));
+
+    invalid_args={{struct};        % missing keys
+                  {1, 'not_a', 1}; % different file
+                  {1.5, 'a', 1};   % non-integer
+                  {1, 1, 1};   % non-integer
+                  {1, 'a', [1 2]}; % non singleton
+                  {[1 2], 'a', 1}; % non singleton
+                  };
+    n = numel(invalid_args);
+    for k=1:n
+        % set state
+        s = get_base_state();
+        mocov_line_covered(s);
+        args = invalid_args{k};
+        assertExceptionThrown(@()mocov_line_covered(args{:}));
+    end
+
 
 function assert_state_equal(s, t)
     assertEqual(sort(fieldnames(s)), {'keys'; 'line_count'});
