@@ -400,14 +400,12 @@ void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
     cf->lines[line_number].count++;
 
     const bool needs_to_set_filename = cf->filename == NULL;
-    const bool has_pointer_match =
-#if CACHE_FILENAME_POINTERS
-        cf->lines[line_number].filename_mx == fn_mx;
-#else
-        false;
-#endif
+
     // conditional block when using caching, unconditional otherwise
-    if (needs_to_set_filename || !has_pointer_match) {
+#if CACHE_FILENAME_POINTERS
+    if (needs_to_set_filename || cf->lines[line_number].filename_mx != fn_mx)
+#endif
+    {
 
         char *fn = mxArrayToString(fn_mx);
         raise_mex_error_if_null_pointer(fn, "fn in update_state");
