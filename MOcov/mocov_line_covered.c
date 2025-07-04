@@ -400,12 +400,15 @@ void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
     cf->lines[line_number].count++;
 
     const bool needs_to_set_filename = cf->filename == NULL;
+    const bool has_pointer_match =
 #if CACHE_FILENAME_POINTERS
-    // conditional block when using caching, unconditional otherwise
-    if (needs_to_set_filename || cf->lines[line_number].filename_mx == NULL ||
-        cf->lines[line_number].filename_mx != fn_mx)
+        cf->lines[line_number].filename_mx == fn_mx;
+#else
+        false;
 #endif
-    {
+    // conditional block when using caching, unconditional otherwise
+    if (needs_to_set_filename || !has_pointer_match) {
+
         char *fn = mxArrayToString(fn_mx);
         raise_mex_error_if_null_pointer(fn, "fn in update_state");
 
@@ -420,45 +423,12 @@ void add_line_covered(int idx, const mxArray *fn_mx, int line_number) {
                                 "File name mismatch, this should not happen");
             }
         }
+#if CACHE_FILENAME_POINTERS
+        // update filename pointer
+        cf->lines[line_number].filename_mx = fn_mx;
+#endif
     }
 
-    /*
-
-        // see if we need to set or check the filename
-        char *fn = NULL;
-        if (cf->filename == NULL) {
-            fn = mxArrayToString(fn_mx);
-            raise_mex_error_if_null_pointer(fn, "fn in update_state");
-
-            // First call for filename with this index, store filename
-            cf->filename = fn;
-        }
-
-    #if CACHE_FILENAME_POINTERS
-        if (cf->lines[line_number].filename_mx == NULL ||
-            cf->lines[line_number].filename_mx != fn_mx) {
-    #else
-        { // start unconditional block
-    #endif
-            // only free fn later if it was not set in the code block above
-            const bool free_fn = (fn == NULL);
-            fn = mxArrayToString(fn_mx);
-            raise_mex_error_if_null_pointer(fn, "fn in update_state");
-            const bool raise_error = strcmp(cf->filename, fn) != 0;
-            if (free_fn) {
-                free(fn);
-            }
-            if (raise_error) {
-                raise_mex_error("FileNameMismatch",
-                                "File name mismatch, this should not happen");
-            }
-    #if CACHE_FILENAME_POINTERS
-            // update filename pointer
-            cf->lines[line_number].filename_mx = fn_mx;
-    #endif
-
-        } // else: cache hit, no need to check or update filename pointer
-    */
     debug("done adding line covered");
     debug_print_state();
 }
