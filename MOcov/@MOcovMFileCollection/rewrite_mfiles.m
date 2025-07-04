@@ -36,7 +36,7 @@ function obj = rewrite_mfiles(obj, temp_dir)
         % interprets as escape characters. Therefore we construct the
         % decorator using string concatenation.
         prefix = sprintf('mocov_line_covered(%d,''%s'',', k, rel_fn);
-        suffix = ',1);';
+        suffix = ');';
         decorator = @(line_number) [prefix sprintf('%d', line_number) suffix];
 
         write_lines_with_prefix(mfile, tmp_fn, decorator);
