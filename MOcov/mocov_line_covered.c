@@ -253,7 +253,7 @@ void extend_covered_file(covered_file *file, size_t new_capacity) {
         new_lines[i].filename_mx = NULL;
 #endif
     }
-    // TODO: can we use memset instead? This might assume thta NULL==0...
+    // TODO: can we use memset instead? This might assume that NULL==0...
     // memset(new_lines + file->capacity, 0,
     //       (new_capacity - file->capacity) * sizeof(covered_line));
 
