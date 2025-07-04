@@ -52,12 +52,12 @@ function test_mocov_line_covered_exceptions()
     cleaner = onCleanup(@()mocov_line_covered(initial_state));
 
     invalid_args = {{struct}         % missing keys
-                  {1, 'not_a', 1}  % different file
-                  {1.5, 'a', 1}    % non-integer
-                  {1, 1, 1}    % non-integer
-                  {1, 'a', [1 2]}  % non singleton
-                  {[1 2], 'a', 1}  % non singleton
-                 };
+                    {1, 'not_a', 1}  % different file
+                    {1.5, 'a', 1}    % non-integer
+                    {1, 1, 1}    % non-integer
+                    {1, 'a', [1 2]}  % non singleton
+                    {[1 2], 'a', 1}  % non singleton
+                   };
     n = numel(invalid_args);
     for k = 1:n
         % set state
