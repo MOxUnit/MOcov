@@ -63,6 +63,12 @@ function state = mocov_line_covered(varargin)
             line = varargin{3};
             count = 1;
 
+            if ~isnumeric(index) || ~ischar(key) || ~isnumeric(line) ...
+                    || numel(index) ~= 1 || round(index) ~= index ...
+                    || numel(line) ~= 1 || round(line) ~= line
+                error('illegal argument');
+            end
+
             state = [];
 
         otherwise
