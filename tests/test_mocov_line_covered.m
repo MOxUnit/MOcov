@@ -61,10 +61,14 @@ function test_mocov_line_covered_exceptions()
     n = numel(invalid_args);
     for k = 1:n
         % set state
-        s = get_base_state();
-        mocov_line_covered(s);
+        s_base = get_base_state();
+        mocov_line_covered(s_base);
         args = invalid_args{k};
         assertExceptionThrown(@()mocov_line_covered(args{:}));
+
+        % verify state is maintained after exception was raised
+        s_after = mocov_line_covered();
+        assert_state_equal(s_base, s_after);
     end
 
 function assert_state_equal(s, t)

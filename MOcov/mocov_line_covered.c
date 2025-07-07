@@ -25,7 +25,9 @@
 #include <string.h>
 
 // 0 -> no debugging messages; 1 -> print (lots of) debugging messages
+#ifndef IS_DEBUG
 #define IS_DEBUG 0
+#endif
 
 // Octave represents a string literal through a pointer. By caching the
 // pointer, repeated string comparison calls can be avoided. This comes at the
@@ -33,7 +35,9 @@
 // Some basic benchmarking (Octave version 9.4.0, Mac silicon, 2025) suggests
 // that no cache may be slightly faster.
 // 0 -> no cache (more string comparisons), 1 -> cache (requires more memory)
+#ifndef CACHE_FILENAME_POINTERS
 #define CACHE_FILENAME_POINTERS 0
+#endif
 
 typedef int line_count_t;
 
