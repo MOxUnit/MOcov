@@ -13,8 +13,8 @@
 // for allocating and freeing space for these structs when needed.
 //
 // To help with debugging, the code defines and uses `debug()` en
-// `debug_print_state()` calls. When enabled (not by defaylt), this prints
-// extensive output that migh help debugging.
+// `debug_print_state()` calls. When enabled (not by default), this prints
+// extensive output that might help debugging.
 
 #include "mex.h"
 #include <assert.h>
