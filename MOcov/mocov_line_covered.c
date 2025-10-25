@@ -189,8 +189,9 @@ void raise_mex_error(const char *error_id_label, const char *error_message) {
     }
 
     // Concatenate the prefix and the original error_id into new_errorid
-    snprintf(error_id, MAX_ERROR_ID_LENGTH, "%s%s", ERROR_ID_PREFIX,
-             error_id_label);
+    size_t prefix_len = strlen(ERROR_ID_PREFIX);
+    snprintf(error_id, MAX_ERROR_ID_LENGTH, "%s", ERROR_ID_PREFIX);
+    strncat(error_id, error_id_label, MAX_ERROR_ID_LENGTH - prefix_len - 1);
 
     // Call the original mexErrMsgIdAndTxt function with the new error_id
     mexErrMsgIdAndTxt(error_id, error_message);
