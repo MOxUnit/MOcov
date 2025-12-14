@@ -13,7 +13,8 @@
 // for allocating and freeing space for these structs when needed.
 //
 // To help with debugging, the code defines and uses `debug()` en
-// `debug_print_state()` calls.
+// `debug_print_state()` calls. When enabled (not by default), this prints
+// extensive output that might help debugging.
 
 #include "mex.h"
 #include <assert.h>
@@ -68,15 +69,15 @@ typedef struct {
 
 // Declare constants
 // (these should not be changed unless you really know what you are doing)
-const int GENERAL_STRING_BUFFER_LENGHTH = 100;
-const int MAX_ERROR_ID_LENGTH = GENERAL_STRING_BUFFER_LENGHTH;
-const int MAX_ERROR_MESSAGE_LENGTH = GENERAL_STRING_BUFFER_LENGHTH;
+#define GENERAL_STRING_BUFFER_LENGTH 100
+#define MAX_ERROR_ID_LENGTH 200
+#define MAX_ERROR_MESSAGE_LENGTH GENERAL_STRING_BUFFER_LENGTH
 
 const char *ERROR_ID_PREFIX = "mocov_line_covered:";
 const char *MALLOC_ERROR_MESSAGE_PREFIX = "memory allocation failed: ";
 
 #if IS_DEBUG
-const int DEBUG_BUFFER_SIZE = GENERAL_STRING_BUFFER_LENGHTH;
+const int DEBUG_BUFFER_SIZE = GENERAL_STRING_BUFFER_LENGTH;
 const char *DEBUG_PREFIX = "DEBUG: ";
 #endif
 
@@ -188,8 +189,9 @@ void raise_mex_error(const char *error_id_label, const char *error_message) {
     }
 
     // Concatenate the prefix and the original error_id into new_errorid
-    snprintf(error_id, MAX_ERROR_ID_LENGTH, "%s%s", ERROR_ID_PREFIX,
-             error_id_label);
+    size_t prefix_len = strlen(ERROR_ID_PREFIX);
+    snprintf(error_id, MAX_ERROR_ID_LENGTH, "%s", ERROR_ID_PREFIX);
+    strncat(error_id, error_id_label, MAX_ERROR_ID_LENGTH - prefix_len - 1);
 
     // Call the original mexErrMsgIdAndTxt function with the new error_id
     mexErrMsgIdAndTxt(error_id, error_message);
@@ -441,7 +443,7 @@ void return_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
                         "This function accepts at most one output.");
 
     } else if (nlhs == 0) {
-        // No output, nothing to do, we can exit this function
+        // No output, nothing to do, we can exit this function early.
         return;
     }
 
@@ -622,7 +624,7 @@ void set_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
     debug_print_state();
 }
 
-// Helper function to handle nrhs == 4 case (update the state with a specific
+// Helper function to handle nrhs == 3 case (update the state with a specific
 // line state)
 void update_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
 
@@ -641,8 +643,6 @@ void update_state(const mxArray *prhs[], int nlhs, mxArray *plhs[]) {
     debug("call 3 args");
     add_line_covered(idx, prhs[1], line_number);
 
-    // free fn pointer after use
-    // free(fn);
     debug("updating state: done, state is now");
     debug_print_state();
 }
@@ -659,9 +659,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
 
     if (nrhs == 3) {
-        // Update the state for a specific line in a file.
-        // Optimization: because `nrhs == 4` is the most frequently used
-        // use of this function, this is checked first.
+        // Most common case: update the state for a specific line in a file.
         update_state(prhs, nlhs, plhs);
     } else if (nrhs == 1) {
         // Set the state from a struct s with s.keys and s.line_count
