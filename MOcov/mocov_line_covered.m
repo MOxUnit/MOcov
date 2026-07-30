@@ -56,12 +56,15 @@ function state = mocov_line_covered(varargin)
             cached_line_count = state.line_count;
             return
 
-        case 3
+        case {3, 4}
             % add a line covered
             index = varargin{1};
             key = varargin{2};
             line = varargin{3};
             count = 1;
+            if nargin == 4
+                count = varargin{4};
+            end
 
             if ~isnumeric(index) || ~ischar(key) || ~isnumeric(line) || ...
                     numel(index) ~= 1 || round(index) ~= index || ...
